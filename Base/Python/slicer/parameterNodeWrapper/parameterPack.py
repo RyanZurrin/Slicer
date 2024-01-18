@@ -86,19 +86,17 @@ def _initMethod(self, *args, **kwargs) -> None:
 
 def _eqMethod(self, other) -> bool:
     if type(self) == type(other):
-        return all([
-            _readValue(self, parameter.basename) == _readValue(other, parameter.basename)
+        return all(
+            _readValue(self, parameter.basename)
+            == _readValue(other, parameter.basename)
             for parameter in self.allParameters.values()
-        ])
+        )
     else:
         return False
 
 
 def _quoteIfStr(value):
-    if isinstance(value, str):
-        return f'"{value}"'
-    else:
-        return value
+    return f'"{value}"' if isinstance(value, str) else value
 
 
 def _strMethod(self) -> str:
@@ -142,10 +140,7 @@ def _getValue(self, membername: str):
     _checkTopMember(self, membername)
     topname, subname = splitPossiblyDottedName(membername)
     topnameValue = getattr(self, topname)
-    if subname is None:
-        return topnameValue
-    else:
-        return _getValue(topnameValue, subname)
+    return topnameValue if subname is None else _getValue(topnameValue, subname)
 
 
 def _setValue(self, membername: str, value):
@@ -266,9 +261,7 @@ def parameterPack(classtype=None):
         return _processParameterPack(cls)
 
     # See if we're being called as @parameterPack or @parameterPack().
-    if classtype is None:
-        return wrap
-    return wrap(classtype)
+    return wrap if classtype is None else wrap(classtype)
 
 
 @dataclasses.dataclass
@@ -292,6 +285,9 @@ def _makeObservedProperty(superType, name: str):
 
 
 def createObservedParameterPackImpl(packType):
+
+
+
     class ObservedParameterPack(packType):
         def __init__(self,
                      parameterNode: slicer.vtkMRMLScriptedModuleNode,
@@ -346,12 +342,13 @@ def createObservedParameterPackImpl(packType):
             if type(self) == type(other):
                 return packType.__eq__(self, other)
             elif packType == type(other):
-                return all([
+                return all(
                     self.getValue(name) == other.getValue(name)
                     for name in self.allParameters.keys()
-                ])
+                )
             else:
                 return False
+
 
     for paramName in packType.allParameters.keys():
         setattr(ObservedParameterPack, paramName, _makeObservedProperty(packType, paramName))
@@ -445,4 +442,7 @@ class ParameterPackSerializer(Serializer):
         return createObservedParameterPack(self.type, parameterNode, self, name, args)
 
     def supportsCaching(self) -> bool:
-        return all([parameter.serializer.supportsCaching() for parameter in self._allParameters.values()])
+        return all(
+            parameter.serializer.supportsCaching()
+            for parameter in self._allParameters.values()
+        )

@@ -239,8 +239,9 @@ class ScriptedLoadableModuleTemplateTest(ScriptedLoadableModuleTest):
         volumeNode = SampleData.downloadFromURL(
             nodeNames="MRHead",
             fileNames="MR-head.nrrd",
-            uris=TESTING_DATA_URL + "SHA256/cc211f0dfd9a05ca3841ce1141b292898b2dd2d3f08286affadf823a7e58df93",
-            checksums="SHA256:cc211f0dfd9a05ca3841ce1141b292898b2dd2d3f08286affadf823a7e58df93")
+            uris=f"{TESTING_DATA_URL}SHA256/cc211f0dfd9a05ca3841ce1141b292898b2dd2d3f08286affadf823a7e58df93",
+            checksums="SHA256:cc211f0dfd9a05ca3841ce1141b292898b2dd2d3f08286affadf823a7e58df93",
+        )
         self.delayDisplay("Finished with download and loading")
 
         logic = ScriptedLoadableModuleTemplateLogic()

@@ -37,7 +37,9 @@ if __name__ == "__main__":
     #  * avoid deleting the extension_dir
 
     if len(sys.argv) != 3:
-        print(os.path.basename(sys.argv[0]) + " /path/to/Slicer /path/to/slicerExtensionWizard")
+        print(
+            f"{os.path.basename(sys.argv[0])} /path/to/Slicer /path/to/slicerExtensionWizard"
+        )
         exit(EXIT_FAILURE)
 
     slicer_executable = os.path.expanduser(sys.argv[1])
@@ -52,16 +54,17 @@ if __name__ == "__main__":
     extension_dir = tempfile.mkdtemp()
     assert os.path.isdir(extension_dir)
     if debug:
-        print("extension_dir: %s" % extension_dir)
+        print(f"extension_dir: {extension_dir}")
 
     moduleNames = ["A", "B", "C", "D"]
 
-    additional_module_paths = ["--additional-module-paths"]
-    additional_module_paths.extend([f"{extension_dir}/Test/{moduleName}" for moduleName in moduleNames])
-
+    additional_module_paths = [
+        "--additional-module-paths",
+        *[f"{extension_dir}/Test/{moduleName}" for moduleName in moduleNames],
+    ]
     args = ["--create", "Test"]
     for moduleName in moduleNames:
-        args.extend(["--addModule", "scripted:%s" % moduleName])
+        args.extend(["--addModule", f"scripted:{moduleName}"])
     args.extend([extension_dir])
     (returnCode, stdout, stderr) = run(slicer_extension_wizard, args, shell=True)
     assert returnCode == EXIT_SUCCESS
@@ -78,8 +81,13 @@ if __name__ == "__main__":
 
         # Update settings disabling module B
         args = list(common_args)
-        args.extend(["--keep-temporary-settings"])
-        args.extend(["--python-code", 'slicer.app.moduleManager().factoryManager().modulesToIgnore = ["B"]'])
+        args.extend(
+            [
+                "--keep-temporary-settings",
+                "--python-code",
+                'slicer.app.moduleManager().factoryManager().modulesToIgnore = ["B"]',
+            ]
+        )
         args.extend(additional_module_paths)
         (returnCode, stdout, stderr) = runSlicerAndExit(slicer_executable, args)
         assert returnCode == EXIT_SUCCESS
@@ -87,8 +95,13 @@ if __name__ == "__main__":
 
         # Run application to check that module B is disabled
         args = list(common_args)
-        args.extend(["--keep-temporary-settings"])
-        args.extend(["--python-code", 'assert len([module for module in dir(slicer.moduleNames) if module in ["A", "C", "D"]]) == 3, "Failed to disable modules"'])
+        args.extend(
+            [
+                "--keep-temporary-settings",
+                "--python-code",
+                'assert len([module for module in dir(slicer.moduleNames) if module in ["A", "C", "D"]]) == 3, "Failed to disable modules"',
+            ]
+        )
         args.extend(additional_module_paths)
         (returnCode, stdout, stderr) = runSlicerAndExit(slicer_executable, args)
         assert returnCode == EXIT_SUCCESS
@@ -96,9 +109,15 @@ if __name__ == "__main__":
 
         # Run application given "--modules-to-ignore A,D" and check that A, D and B are disabled
         args = list(common_args)
-        args.extend(["--keep-temporary-settings"])
-        args.extend(["--modules-to-ignore", "A,D"])
-        args.extend(["--python-code", 'assert len([module for module in dir(slicer.moduleNames) if module in ["C"]]) == 1, "Failed to disable modules"'])
+        args.extend(
+            [
+                "--keep-temporary-settings",
+                "--modules-to-ignore",
+                "A,D",
+                "--python-code",
+                'assert len([module for module in dir(slicer.moduleNames) if module in ["C"]]) == 1, "Failed to disable modules"',
+            ]
+        )
         args.extend(additional_module_paths)
         (returnCode, stdout, stderr) = runSlicerAndExit(slicer_executable, args)
         assert returnCode == EXIT_SUCCESS
@@ -106,8 +125,13 @@ if __name__ == "__main__":
 
         # Run application to check that only B remains disabled
         args = list(common_args)
-        args.extend(["--keep-temporary-settings"])
-        args.extend(["--python-code", 'assert len([module for module in dir(slicer.moduleNames) if module in ["A", "C", "D"]]) == 3, "Failed to disable modules"'])
+        args.extend(
+            [
+                "--keep-temporary-settings",
+                "--python-code",
+                'assert len([module for module in dir(slicer.moduleNames) if module in ["A", "C", "D"]]) == 3, "Failed to disable modules"',
+            ]
+        )
         args.extend(additional_module_paths)
         (returnCode, stdout, stderr) = runSlicerAndExit(slicer_executable, args)
         assert returnCode == EXIT_SUCCESS

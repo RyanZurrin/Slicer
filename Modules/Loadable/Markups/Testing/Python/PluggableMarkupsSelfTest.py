@@ -100,17 +100,13 @@ class PluggableMarkupsSelfTestLogic(ScriptedLoadableModuleLogic):
             additionalOptionsWidgetsFactory.registerOptionsWidget(additionalOptionsWidget)
 
     def __checkPushButtonExists(self, widget, name):
-        pushButtonObjectName = "Create%sPushButton" % name
+        pushButtonObjectName = f"Create{name}PushButton"
         # slicer.util.delayDisplay("Checking whether '%s' exists" % pushButtonObjectName)
-        if widget.findChild(qt.QPushButton, pushButtonObjectName):
-            return True
-        return False
+        return bool(widget.findChild(qt.QPushButton, pushButtonObjectName))
 
     def __checkWidgetExists(self, widget, name):
         # slicer.util.delayDisplay("Checking whether '%s' exists" % name)
-        if widget.findChild(qt.QWidget, name):
-            return True
-        return False
+        return bool(widget.findChild(qt.QWidget, name))
 
     def __checkWidgetVisibility(self, widget, name):
         # slicer.util.delayDisplay("Checking whether '%s' is visible" % pushButtonObjectName)
@@ -148,7 +144,9 @@ class PluggableMarkupsSelfTestLogic(ScriptedLoadableModuleLogic):
         # Check Markups module standard nodes are registered
         for markupNode in self.markupsNodes():
             if self.__checkPushButtonExists(markupsWidget, markupNode.GetMarkupType()) is None:
-                raise Exception("Create PushButton for %s is not present" % markupNode.GetMarkupType())
+                raise Exception(
+                    f"Create PushButton for {markupNode.GetMarkupType()} is not present"
+                )
 
         markupsLogic = slicer.modules.markups.logic()
         if markupsLogic is None:
@@ -156,10 +154,12 @@ class PluggableMarkupsSelfTestLogic(ScriptedLoadableModuleLogic):
 
         # Unregister Markups and check the buttons are gone
         for markupNode in self.markupsNodes():
-            slicer.util.delayDisplay("Unregistering %s" % markupNode.GetMarkupType())
+            slicer.util.delayDisplay(f"Unregistering {markupNode.GetMarkupType()}")
             markupsLogic.UnregisterMarkupsNode(markupNode)
             if self.__checkPushButtonExists(markupsWidget, markupNode.GetMarkupType()):
-                raise Exception("Create PushButton for %s is present after unregistration" % markupNode.GetMarkupType())
+                raise Exception(
+                    f"Create PushButton for {markupNode.GetMarkupType()} is present after unregistration"
+                )
 
     def test_register_markups(self):
         """This registers all known markups"""
@@ -175,10 +175,12 @@ class PluggableMarkupsSelfTestLogic(ScriptedLoadableModuleLogic):
 
         # Check Markups module standard nodes are registered
         for markupNode in markupsNodes:
-            slicer.util.delayDisplay("Registering %s" % markupNode.GetMarkupType())
+            slicer.util.delayDisplay(f"Registering {markupNode.GetMarkupType()}")
             markupsLogic.RegisterMarkupsNode(markupNode, markupsNodes[markupNode])
             if self.__checkPushButtonExists(markupsWidget, markupNode.GetMarkupType()) is None:
-                raise Exception("Create PushButton for %s is not present" % markupNode.GetMarkupType())
+                raise Exception(
+                    f"Create PushButton for {markupNode.GetMarkupType()} is not present"
+                )
 
     def test_unregister_additional_options_widgets(self):
         """This unregisters all the additional options widgets"""
@@ -190,7 +192,7 @@ class PluggableMarkupsSelfTestLogic(ScriptedLoadableModuleLogic):
         for additionalOptionsWidget in self.additionalOptionsWidgets():
             # Check the widget exists
             if not self.__checkWidgetExists(markupsWidget, additionalOptionsWidget.objectName):
-                raise Exception("%s does not exist" % additionalOptionsWidget.objectName)
+                raise Exception(f"{additionalOptionsWidget.objectName} does not exist")
 
             # NOTE: since the widget will get destroyed, we take note of the name for the checking step
             objectName = additionalOptionsWidget.objectName
@@ -200,7 +202,7 @@ class PluggableMarkupsSelfTestLogic(ScriptedLoadableModuleLogic):
 
             # Check the widget does not exist
             if self.__checkWidgetExists(markupsWidget, objectName):
-                raise Exception("%s does still exist" % objectName)
+                raise Exception(f"{objectName} does still exist")
 
     def test_register_additional_options_widgets(self):
         """This reigisters additional options widgets"""
@@ -213,12 +215,12 @@ class PluggableMarkupsSelfTestLogic(ScriptedLoadableModuleLogic):
 
         for additionalOptionsWidget in self.additionalOptionsWidgets():
             name = additionalOptionsWidget.objectName
-            slicer.util.delayDisplay("Registering %s" % additionalOptionsWidget.objectName)
+            slicer.util.delayDisplay(f"Registering {additionalOptionsWidget.objectName}")
             additionalOptionsWidgetsFactory.registerOptionsWidget(additionalOptionsWidget)
 
             # Check the widget exists
             if not self.__checkWidgetExists(markupsWidget, name):
-                raise Exception("%s does not exist" % additionalOptionsWidget.objectName)
+                raise Exception(f"{additionalOptionsWidget.objectName} does not exist")
 
     def run(self):
         """Run the tests"""

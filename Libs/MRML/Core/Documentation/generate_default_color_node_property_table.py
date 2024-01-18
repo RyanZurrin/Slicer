@@ -21,6 +21,7 @@ This script allows to generate the markdown table displayed in doxygen
 documentation of vtkMRMLColorLogic::AddDefaultColorNodes()
 """
 
+
 nodes = slicer.mrmlScene.GetNodesByClass("vtkMRMLColorNode")
 nodes.UnRegister(slicer.mrmlScene)
 
@@ -46,7 +47,7 @@ titles = {"family": "Family",
 max_row_widths = {column_name: len(column_title) for (column_name, column_title) in titles.items()}
 
 for row in table:
-    for column_name in max_row_widths.keys():
+    for column_name in max_row_widths:
         column_width = len(str(row[column_name]))
         if column_width > max_row_widths[column_name]:
             max_row_widths[column_name] = column_width

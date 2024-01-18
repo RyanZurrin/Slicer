@@ -29,9 +29,7 @@ class SegmentEditorMaskVolumeEffect(AbstractScriptedSegmentEditorEffect):
     def icon(self):
         # It should not be necessary to modify this method
         iconPath = os.path.join(os.path.dirname(__file__), "Resources/Icons/MaskVolume.png")
-        if os.path.exists(iconPath):
-            return qt.QIcon(iconPath)
-        return qt.QIcon()
+        return qt.QIcon(iconPath) if os.path.exists(iconPath) else qt.QIcon()
 
     def helpText(self):
         return "<html>" + _("""Use the currently selected segment as a mask to blank out regions in a volume<br>.
@@ -162,7 +160,7 @@ Fill inside and outside operation creates a binary labelmap volume as output, wi
 
         # Apply button
         self.applyButton = qt.QPushButton(_("Apply"))
-        self.applyButton.objectName = self.__class__.__name__ + "Apply"
+        self.applyButton.objectName = f"{self.__class__.__name__}Apply"
         self.applyButton.setToolTip(_("Apply segment as volume mask. No undo operation available once applied."))
         self.scriptedEffect.addOptionsWidget(self.applyButton)
         self.applyButton.connect("clicked()", self.onApply)
@@ -229,10 +227,9 @@ Fill inside and outside operation creates a binary labelmap volume as output, wi
             if self.outputVolumeSelector.noneDisplay != _("(Create new Volume)"):
                 self.outputVolumeSelector.noneDisplay = _("(Create new Volume)")
                 self.outputVolumeSelector.nodeTypes = ["vtkMRMLScalarVolumeNode", "vtkMRMLLabelMapVolumeNode"]
-        else:
-            if self.outputVolumeSelector.noneDisplay != _("(Create new Labelmap Volume)"):
-                self.outputVolumeSelector.noneDisplay = _("(Create new Labelmap Volume)")
-                self.outputVolumeSelector.nodeTypes = ["vtkMRMLLabelMapVolumeNode", "vtkMRMLScalarVolumeNode"]
+        elif self.outputVolumeSelector.noneDisplay != _("(Create new Labelmap Volume)"):
+            self.outputVolumeSelector.noneDisplay = _("(Create new Labelmap Volume)")
+            self.outputVolumeSelector.nodeTypes = ["vtkMRMLLabelMapVolumeNode", "vtkMRMLScalarVolumeNode"]
 
         self.inputVisibilityButton.setIcon(self.visibleIcon if self.isVolumeVisible(inputVolume) else self.invisibleIcon)
         self.outputVisibilityButton.setIcon(self.visibleIcon if self.isVolumeVisible(outputVolume) else self.invisibleIcon)
@@ -281,8 +278,7 @@ Fill inside and outside operation creates a binary labelmap volume as output, wi
             self.updateGUIFromMRML()
 
     def onOutputVisibilityButtonClicked(self):
-        outputVolume = self.scriptedEffect.nodeReference("OutputVolume")
-        if outputVolume:
+        if outputVolume := self.scriptedEffect.nodeReference("OutputVolume"):
             slicer.util.setSliceViewerLayers(background=outputVolume)
             self.updateGUIFromMRML()
 
@@ -307,10 +303,10 @@ Fill inside and outside operation creates a binary labelmap volume as output, wi
                 volumesLogic = slicer.modules.volumes.logic()
                 scene = inputVolume.GetScene()
                 if operationMode == "FILL_INSIDE_AND_OUTSIDE":
-                    outputVolumeName = inputVolume.GetName() + " label"
+                    outputVolumeName = f"{inputVolume.GetName()} label"
                     outputVolume = volumesLogic.CreateAndAddLabelVolume(inputVolume, outputVolumeName)
                 else:
-                    outputVolumeName = inputVolume.GetName() + " masked"
+                    outputVolumeName = f"{inputVolume.GetName()} masked"
                     outputVolume = volumesLogic.CloneVolumeGeneric(scene, inputVolume, outputVolumeName, False)
                 self.outputVolumeSelector.setCurrentNode(outputVolume)
 

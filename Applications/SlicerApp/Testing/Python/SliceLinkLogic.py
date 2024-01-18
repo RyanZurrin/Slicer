@@ -135,8 +135,9 @@ class SliceLinkLogicTest(ScriptedLoadableModuleTest):
         SampleData.downloadFromURL(
             nodeNames="FA",
             fileNames="FA.nrrd",
-            uris=TESTING_DATA_URL + "SHA256/12d17fba4f2e1f1a843f0757366f28c3f3e1a8bb38836f0de2a32bb1cd476560",
-            checksums="SHA256:12d17fba4f2e1f1a843f0757366f28c3f3e1a8bb38836f0de2a32bb1cd476560")
+            uris=f"{TESTING_DATA_URL}SHA256/12d17fba4f2e1f1a843f0757366f28c3f3e1a8bb38836f0de2a32bb1cd476560",
+            checksums="SHA256:12d17fba4f2e1f1a843f0757366f28c3f3e1a8bb38836f0de2a32bb1cd476560",
+        )
         self.delayDisplay("Finished with download and loading")
         print("")
 
@@ -145,7 +146,7 @@ class SliceLinkLogicTest(ScriptedLoadableModuleTest):
         self.assertIsNotNone(logic.hasImageData(volumeNode))
 
         eps = 0.02  # on high-DPI screens FOV difference can be up to 1.25%, so set the tolerance to 2%
-        print("eps = " + str(eps) + "\n")
+        print(f"eps = {eps}" + "\n")
 
         # Change to a CompareView
         ln = slicer.mrmlScene.GetFirstNodeByClass("vtkMRMLLayoutNode")
@@ -198,11 +199,15 @@ class SliceLinkLogicTest(ScriptedLoadableModuleTest):
         # differ by a few units)
         self.delayDisplay("Broadcasted a reset of the field of view to all Compare Views")
         diff = abs(compareNode2.GetFieldOfView()[1] - compareNode.GetFieldOfView()[1]) / compareNode.GetFieldOfView()[1]
-        print("Field of view of comparison (y) between compare viewers #1 and #2: " + str(diff))
+        print(
+            f"Field of view of comparison (y) between compare viewers #1 and #2: {str(diff)}"
+        )
         self.assertLess(diff, eps)
 
         diff = abs(compareNode3.GetFieldOfView()[1] - compareNode.GetFieldOfView()[1]) / compareNode.GetFieldOfView()[1]
-        print("Field of view of comparison (y) between compare viewers #1 and #3: " + str(diff))
+        print(
+            f"Field of view of comparison (y) between compare viewers #1 and #3: {str(diff)}"
+        )
         self.assertLess(diff, eps)
         print("")
 
@@ -217,11 +222,15 @@ class SliceLinkLogicTest(ScriptedLoadableModuleTest):
         # differ by a few units)
         self.delayDisplay("Changed the number of lightboxes")
         diff = abs(compareNode2.GetFieldOfView()[1] - compareNode.GetFieldOfView()[1]) / compareNode.GetFieldOfView()[1]
-        print("Field of view of comparison (y) between compare viewers #1 and #2: " + str(diff))
+        print(
+            f"Field of view of comparison (y) between compare viewers #1 and #2: {str(diff)}"
+        )
         self.assertLess(diff, eps)
 
         diff = abs(compareNode3.GetFieldOfView()[1] - compareNode.GetFieldOfView()[1]) / compareNode.GetFieldOfView()[1]
-        print("Field of view of comparison between compare viewers #1 and #3: " + str(diff))
+        print(
+            f"Field of view of comparison between compare viewers #1 and #3: {str(diff)}"
+        )
         self.assertLess(diff, eps)
         print("")
 
@@ -233,11 +242,11 @@ class SliceLinkLogicTest(ScriptedLoadableModuleTest):
 
         self.delayDisplay("Broadcasted a pan to all Compare Views")
         diff = abs(compareNode2.GetXYZOrigin()[0] - compareNode.GetXYZOrigin()[0])
-        print("Origin comparison (x) between compare viewers #1 and #2: " + str(diff))
+        print(f"Origin comparison (x) between compare viewers #1 and #2: {str(diff)}")
         self.assertLess(diff, eps)
 
         diff = abs(compareNode3.GetXYZOrigin()[0] - compareNode.GetXYZOrigin()[0])
-        print("Origin comparison (x) between compare viewers #1 and #3: " + str(diff))
+        print(f"Origin comparison (x) between compare viewers #1 and #3: {str(diff)}")
         self.assertLess(diff, eps)
         print("")
 
@@ -250,11 +259,15 @@ class SliceLinkLogicTest(ScriptedLoadableModuleTest):
         # a few units)
         self.delayDisplay("Broadcasted a zoom to all Compare Views")
         diff = abs(compareNode2.GetFieldOfView()[0] - compareNode.GetFieldOfView()[0]) / compareNode.GetFieldOfView()[0]
-        print("Field of view of comparison (x) between compare viewers #1 and #2: " + str(diff))
+        print(
+            f"Field of view of comparison (x) between compare viewers #1 and #2: {str(diff)}"
+        )
         self.assertLess(diff, eps)
 
         diff = abs(compareNode3.GetFieldOfView()[0] - compareNode.GetFieldOfView()[0]) / compareNode.GetFieldOfView()[0]
-        print("Field of view of comparison (x) between compare viewers #1 and #3: " + str(diff))
+        print(
+            f"Field of view of comparison (x) between compare viewers #1 and #3: {str(diff)}"
+        )
         self.assertLess(diff, eps)
         print("")
 
@@ -264,11 +277,15 @@ class SliceLinkLogicTest(ScriptedLoadableModuleTest):
         logic.EndSliceNodeInteraction()
         self.delayDisplay("Broadcasted a change in slice offset to all Compare Views")
         diff = abs(compareNode2.GetSliceOffset() - compareNode.GetSliceOffset())
-        print("Slice offset comparison between compare viewers #1 and #2: " + str(diff))
+        print(
+            f"Slice offset comparison between compare viewers #1 and #2: {str(diff)}"
+        )
         self.assertLess(diff, eps)
 
         diff = abs(compareNode3.GetSliceOffset() - compareNode.GetSliceOffset())
-        print("Slice offset comparison between compare viewers #1 and #3: " + str(diff))
+        print(
+            f"Slice offset comparison between compare viewers #1 and #3: {str(diff)}"
+        )
         self.assertLess(diff, eps)
         print("")
 

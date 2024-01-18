@@ -29,9 +29,7 @@ class SegmentEditorEffect(AbstractScriptedSegmentEditorEffect):
     def icon(self):
         # It should not be necessary to modify this method
         iconPath = os.path.join(os.path.dirname(__file__), "SegmentEditorEffect.png")
-        if os.path.exists(iconPath):
-            return qt.QIcon(iconPath)
-        return qt.QIcon()
+        return qt.QIcon(iconPath) if os.path.exists(iconPath) else qt.QIcon()
 
     def helpText(self):
         return """Existing segments are grown to fill the image.
@@ -53,7 +51,7 @@ To segment a single object, create a segment and paint inside and create another
 
         # Apply button
         self.applyButton = qt.QPushButton("Apply")
-        self.applyButton.objectName = self.__class__.__name__ + "Apply"
+        self.applyButton.objectName = f"{self.__class__.__name__}Apply"
         self.applyButton.setToolTip("Accept previewed result")
         self.scriptedEffect.addOptionsWidget(self.applyButton)
         self.applyButton.connect("clicked()", self.onApply)

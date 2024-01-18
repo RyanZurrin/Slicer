@@ -76,7 +76,7 @@ class ShaderPropertiesTest(ScriptedLoadableModuleTest):
         self.delayDisplay("Starting...")
         self.setUp()
 
-        fileURL = TESTING_DATA_URL + "SHA256/19ad4f794de8dcdabbe3290c40fa18072cf5e05b6b2466fcc508ea7a42aae71e"
+        fileURL = f"{TESTING_DATA_URL}SHA256/19ad4f794de8dcdabbe3290c40fa18072cf5e05b6b2466fcc508ea7a42aae71e"
         filePath = os.path.join(slicer.util.tempDirectory(), "MRRobot-Shoulder-MR.nrrd")
         slicer.util.downloadFile(fileURL, filePath)
         shoulder = slicer.util.loadVolume(filePath)

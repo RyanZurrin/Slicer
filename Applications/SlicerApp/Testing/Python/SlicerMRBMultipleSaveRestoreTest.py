@@ -82,8 +82,8 @@ class SlicerMRBMultipleSaveRestore(ScriptedLoadableModuleTest):
         """
 
         print("Running SlicerMRBMultipleSaveRestore Test case with:")
-        print("uniqueDirectory : %s" % self.uniqueDirectory)
-        print("strict : %s" % self.strict)
+        print(f"uniqueDirectory : {self.uniqueDirectory}")
+        print(f"strict : {self.strict}")
 
         #
         # first, get the data
@@ -124,7 +124,10 @@ class SlicerMRBMultipleSaveRestore(ScriptedLoadableModuleTest):
         applicationLogic = slicer.app.applicationLogic()
         sceneSaveDirectory = slicer.util.tempDirectory("__scene__")
         mrbFilePath = slicer.util.tempDirectory("__mrb__") + "/SlicerMRBMultipleSaveRestore-1.mrb"
-        self.delayDisplay("Saving scene to: %s\n" % sceneSaveDirectory + "Saving mrb to: %s" % mrbFilePath)
+        self.delayDisplay(
+            "Saving scene to: %s\n" % sceneSaveDirectory
+            + f"Saving mrb to: {mrbFilePath}"
+        )
         self.assertTrue(
             applicationLogic.SaveSceneToSlicerDataBundleDirectory(sceneSaveDirectory, None),
         )
@@ -133,7 +136,9 @@ class SlicerMRBMultipleSaveRestore(ScriptedLoadableModuleTest):
             applicationLogic.Zip(mrbFilePath, sceneSaveDirectory),
         )
         self.delayDisplay("Finished saving MRB")
-        self.delayDisplay("Slicer mrml scene root dir after first save = %s" % slicer.mrmlScene.GetRootDirectory())
+        self.delayDisplay(
+            f"Slicer mrml scene root dir after first save = {slicer.mrmlScene.GetRootDirectory()}"
+        )
 
         #
         # reload the mrb and restore a scene view
@@ -175,7 +180,10 @@ class SlicerMRBMultipleSaveRestore(ScriptedLoadableModuleTest):
         #
         sceneSaveDirectory = slicer.util.tempDirectory("__scene2__")
         mrbFilePath = slicer.util.tempDirectory("__mrb__") + "/SlicerMRBMultipleSaveRestore-2.mrb"
-        self.delayDisplay("Saving scene to: %s\n" % sceneSaveDirectory + "Saving mrb to: %s" % mrbFilePath)
+        self.delayDisplay(
+            "Saving scene to: %s\n" % sceneSaveDirectory
+            + f"Saving mrb to: {mrbFilePath}"
+        )
         self.assertTrue(
             applicationLogic.SaveSceneToSlicerDataBundleDirectory(sceneSaveDirectory, None),
         )
@@ -185,14 +193,16 @@ class SlicerMRBMultipleSaveRestore(ScriptedLoadableModuleTest):
         )
         self.delayDisplay("Finished saving MRB after restoring a scene view")
 
-        self.delayDisplay("Slicer mrml scene root dir after second save = %s" % slicer.mrmlScene.GetRootDirectory())
+        self.delayDisplay(
+            f"Slicer mrml scene root dir after second save = {slicer.mrmlScene.GetRootDirectory()}"
+        )
 
         #
         # reload the second mrb and test
         #
         slicer.mrmlScene.Clear(0)
         mrbExtractPath = slicer.util.tempDirectory("__mrb_extract2__")
-        self.delayDisplay("Now, reload the second saved MRB %s" % mrbFilePath)
+        self.delayDisplay(f"Now, reload the second saved MRB {mrbFilePath}")
         mrbLoaded = applicationLogic.OpenSlicerDataBundle(mrbFilePath, mrbExtractPath)
         # load can return false even though it succeeded - only fail if in strict mode
         self.assertTrue(not self.strict or mrbLoaded)

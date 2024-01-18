@@ -244,8 +244,7 @@ class TablesSelfTestTest(ScriptedLoadableModuleTest):
         # Run CLI module
 
         self.delayDisplay("Run CLI module")
-        parameters = {}
-        parameters["arg0"] = self.createDummyVolume().GetID()
+        parameters = {"arg0": self.createDummyVolume().GetID()}
         parameters["arg1"] = self.createDummyVolume().GetID()
         parameters["transform1"] = self.createDummyTransform().GetID()
         parameters["transform2"] = self.createDummyTransform().GetID()

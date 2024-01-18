@@ -198,7 +198,7 @@ class AddStorableDataAfterSceneViewTestTest(ScriptedLoadableModuleTest):
         self.assertIsNotNone(restoredData)
         slicer.util.delayDisplay("Success: extra storable node NOT removed with scene view restore")
 
-        print("Scene error code = " + str(slicer.mrmlScene.GetErrorCode()))
+        print(f"Scene error code = {str(slicer.mrmlScene.GetErrorCode())}")
         print("\t" + slicer.mrmlScene.GetErrorMessage())
 
         slicer.util.delayDisplay("Test passed!")

@@ -9,7 +9,7 @@ def createNode(cliModule, parameters=None):
         return None
     cliLogic = cliModule.logic()
     if not cliLogic:
-        print("Could not find logic for module '%s'" % cliModule.name)
+        print(f"Could not find logic for module '{cliModule.name}'")
         return None
     node = cliLogic.CreateNodeInScene()
     setNodeParameters(node, parameters)
@@ -41,11 +41,10 @@ def setNodeParameters(node, parameters):
             node.SetParameterAsDouble(key, value)
         elif isinstance(value, slicer.vtkMRMLNode):
             node.SetParameterAsNode(key, value)
-        elif isinstance(value, list) or isinstance(value, tuple):
+        elif isinstance(value, (list, tuple)):
             commaSeparatedString = str(value)
-            commaSeparatedString = commaSeparatedString[1 : len(commaSeparatedString) - 1]
+            commaSeparatedString = commaSeparatedString[1:-1]
             node.SetParameterAsString(key, commaSeparatedString)
-        # TODO: file support
         else:
             print("parameter ", key, " has unsupported type ", value.__class__.__name__)
 

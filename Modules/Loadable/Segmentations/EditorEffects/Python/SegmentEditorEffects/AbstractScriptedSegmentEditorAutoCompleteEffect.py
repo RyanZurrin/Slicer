@@ -79,12 +79,13 @@ class AbstractScriptedSegmentEditorAutoCompleteEffect(AbstractScriptedSegmentEdi
             for j in [2, 3]:
                 for k in [4, 5]:
                     voxelValue = labelmapOrientedImageData.GetScalarComponentAsFloat(extent[i], extent[j], extent[k], 0)
-                    if label is None:
-                        if voxelValue > 0:
-                            numberOfFilledCorners += 1
-                    else:
-                        if voxelValue == label:
-                            numberOfFilledCorners += 1
+                    if (
+                        label is None
+                        and voxelValue > 0
+                        or label is not None
+                        and voxelValue == label
+                    ):
+                        numberOfFilledCorners += 1
                     if numberOfFilledCorners > 4:
                         return True
         return False
@@ -96,7 +97,7 @@ class AbstractScriptedSegmentEditorAutoCompleteEffect(AbstractScriptedSegmentEdi
         self.autoUpdateCheckBox.setEnabled(False)
 
         self.previewButton = qt.QPushButton(_("Initialize"))
-        self.previewButton.objectName = self.__class__.__name__ + "Preview"
+        self.previewButton.objectName = f"{self.__class__.__name__}Preview"
         self.previewButton.setToolTip(_("Preview complete segmentation"))
         # qt.QSizePolicy(qt.QSizePolicy.Expanding, qt.QSizePolicy.Expanding)
         # fails on some systems, therefore set the policies using separate method calls
@@ -130,11 +131,11 @@ class AbstractScriptedSegmentEditorAutoCompleteEffect(AbstractScriptedSegmentEdi
         self.scriptedEffect.addLabeledOptionsWidget(_("Display:"), displayFrame)
 
         self.cancelButton = qt.QPushButton(_("Cancel"))
-        self.cancelButton.objectName = self.__class__.__name__ + "Cancel"
+        self.cancelButton.objectName = f"{self.__class__.__name__}Cancel"
         self.cancelButton.setToolTip(_("Clear preview and cancel auto-complete"))
 
         self.applyButton = qt.QPushButton(_("Apply"))
-        self.applyButton.objectName = self.__class__.__name__ + "Apply"
+        self.applyButton.objectName = f"{self.__class__.__name__}Apply"
         self.applyButton.setToolTip(_("Replace segments by previewed result"))
 
         finishFrame = qt.QHBoxLayout()
@@ -200,15 +201,11 @@ class AbstractScriptedSegmentEditorAutoCompleteEffect(AbstractScriptedSegmentEdi
     def observeSegmentation(self, observationEnabled):
         import vtkSegmentationCorePython as vtkSegmentationCore
 
-        parameterSetNode = self.scriptedEffect.parameterSetNode()
-        segmentationNode = None
-        if parameterSetNode:
+        if parameterSetNode := self.scriptedEffect.parameterSetNode():
             segmentationNode = parameterSetNode.GetSegmentationNode()
-
-        segmentation = None
-        if segmentationNode:
-            segmentation = segmentationNode.GetSegmentation()
-
+        else:
+            segmentationNode = None
+        segmentation = segmentationNode.GetSegmentation() if segmentationNode else None
         if observationEnabled and self.observedSegmentation == segmentation:
             return
         if not observationEnabled and not self.observedSegmentation:
@@ -270,8 +267,7 @@ class AbstractScriptedSegmentEditorAutoCompleteEffect(AbstractScriptedSegmentEdi
 
     def updateMRMLFromGUI(self):
         segmentationNode = self.scriptedEffect.parameterSetNode().GetSegmentationNode()
-        previewNode = self.getPreviewNode()
-        if previewNode:
+        if previewNode := self.getPreviewNode():
             self.setPreviewOpacity(self.previewOpacitySlider.value)
             self.setPreviewShow3D(self.previewShow3DButton.checked)
 
@@ -293,8 +289,9 @@ class AbstractScriptedSegmentEditorAutoCompleteEffect(AbstractScriptedSegmentEdi
     def reset(self):
         self.delayedAutoUpdateTimer.stop()
         self.observeSegmentation(False)
-        previewNode = self.scriptedEffect.nodeReference(ResultPreviewNodeReferenceRole)
-        if previewNode:
+        if previewNode := self.scriptedEffect.nodeReference(
+            ResultPreviewNodeReferenceRole
+        ):
             self.scriptedEffect.setCommonNodeReference(ResultPreviewNodeReferenceRole, None)
             slicer.mrmlScene.RemoveNode(previewNode)
             self.scriptedEffect.setCommonParameter("SegmentationResultPreviewOwnerEffect", "")
@@ -345,8 +342,7 @@ class AbstractScriptedSegmentEditorAutoCompleteEffect(AbstractScriptedSegmentEdi
     def setPreviewOpacity(self, opacity):
         segmentationNode = self.scriptedEffect.parameterSetNode().GetSegmentationNode()
         segmentationNode.GetDisplayNode().SetOpacity(1.0 - opacity)
-        previewNode = self.getPreviewNode()
-        if previewNode:
+        if previewNode := self.getPreviewNode():
             previewNode.GetDisplayNode().SetOpacity(opacity)
             previewNode.GetDisplayNode().SetOpacity3D(opacity)
 
@@ -360,8 +356,7 @@ class AbstractScriptedSegmentEditorAutoCompleteEffect(AbstractScriptedSegmentEdi
         return previewNode.GetDisplayNode().GetOpacity() if previewNode else 0.6  # default opacity for preview
 
     def setPreviewShow3D(self, show):
-        previewNode = self.getPreviewNode()
-        if previewNode:
+        if previewNode := self.getPreviewNode():
             if show:
                 previewNode.CreateClosedSurfaceRepresentation()
             else:
@@ -373,12 +368,12 @@ class AbstractScriptedSegmentEditorAutoCompleteEffect(AbstractScriptedSegmentEdi
         self.previewShow3DButton.blockSignals(wasBlocked)
 
     def getPreviewShow3D(self):
-        previewNode = self.getPreviewNode()
-        if not previewNode:
+        if previewNode := self.getPreviewNode():
+            return previewNode.GetSegmentation().ContainsRepresentation(
+                slicer.vtkSegmentationConverter.GetSegmentationClosedSurfaceRepresentationName()
+            )
+        else:
             return False
-        containsClosedSurfaceRepresentation = previewNode.GetSegmentation().ContainsRepresentation(
-            slicer.vtkSegmentationConverter.GetSegmentationClosedSurfaceRepresentationName())
-        return containsClosedSurfaceRepresentation
 
     def effectiveExtentChanged(self):
         if self.getPreviewNode() is None:
@@ -488,9 +483,9 @@ class AbstractScriptedSegmentEditorAutoCompleteEffect(AbstractScriptedSegmentEdi
                 min(masterImageExtent[3], labelsEffectiveExtent[3] + margin[1]),
                 max(masterImageExtent[4], labelsEffectiveExtent[4] - margin[2]),
                 min(masterImageExtent[5], labelsEffectiveExtent[5] + margin[2])]
-            print("masterImageExtent = " + repr(masterImageExtent))
-            print("labelsEffectiveExtent = " + repr(labelsEffectiveExtent))
-            print("labelsExpandedExtent = " + repr(labelsExpandedExtent))
+            print(f"masterImageExtent = {repr(masterImageExtent)}")
+            print(f"labelsEffectiveExtent = {repr(labelsEffectiveExtent)}")
+            print(f"labelsExpandedExtent = {repr(labelsExpandedExtent)}")
             self.mergedLabelmapGeometryImage.SetExtent(labelsExpandedExtent)
 
             # Create and setup preview node
@@ -539,7 +534,7 @@ class AbstractScriptedSegmentEditorAutoCompleteEffect(AbstractScriptedSegmentEdi
                     logging.error("Failed to create edit mask")
                     self.clippedMaskImageData = None
 
-        previewNode.SetName(segmentationNode.GetName() + " preview")
+        previewNode.SetName(f"{segmentationNode.GetName()} preview")
         previewNode.RemoveClosedSurfaceRepresentation()  # Force the closed surface representation to update
         # TODO: This will no longer be required when we can use the segment editor to set multiple segments
         # as the closed surfaces will be converted as necessary by the segmentation logic.

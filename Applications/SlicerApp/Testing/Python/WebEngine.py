@@ -79,7 +79,7 @@ class WebEngineWidget(ScriptedLoadableModuleWidget):
         ]
         for site in self.sites:
             button = qt.QPushButton(site["label"])
-            button.toolTip = "Open %s" % site["url"]
+            button.toolTip = f'Open {site["url"]}'
             sitesFormLayout.addWidget(button)
             onClick = lambda click, site=site: self.onSiteButtonClicked(site)
             button.connect("clicked(bool)", onClick)

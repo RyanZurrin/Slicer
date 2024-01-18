@@ -23,8 +23,7 @@ SlicerParameterNamePropertyName = "SlicerParameterName"
 
 
 def newParameterNode():
-    node = slicer.mrmlScene.AddNewNodeByClass("vtkMRMLScriptedModuleNode")
-    return node
+    return slicer.mrmlScene.AddNewNodeByClass("vtkMRMLScriptedModuleNode")
 
 
 class ParameterNodeWrapperGuiTest(unittest.TestCase):

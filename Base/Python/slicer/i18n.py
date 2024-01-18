@@ -24,18 +24,16 @@ def getContext(sourceFile):
     Most helper Python scripts in Slicer are Python packages (subfolders containing addition Python scripts and an `__init__.py` file)
     and their name is constructed as PythonPackageName.SourceFileName (for example, `SegmentEditorEffects.SegmentEditorDrawEffect`).
     """
-    if os.path.isfile(sourceFile):
-        parentFolder = os.path.dirname(sourceFile)
-        init_file_path = parentFolder + os.path.sep + "__init__.py"
-
-        if os.path.isfile(init_file_path):
-            context_name = os.path.basename(parentFolder)
-            context_name += "." + os.path.basename(sourceFile).replace(".py", "")
-            return context_name
-        else:
-            return os.path.basename(sourceFile).replace(".py", "")
-    else:
+    if not os.path.isfile(sourceFile):
         return os.path.basename(sourceFile)
+    parentFolder = os.path.dirname(sourceFile)
+    init_file_path = parentFolder + os.path.sep + "__init__.py"
+
+    if not os.path.isfile(init_file_path):
+        return os.path.basename(sourceFile).replace(".py", "")
+    context_name = os.path.basename(parentFolder)
+    context_name += "." + os.path.basename(sourceFile).replace(".py", "")
+    return context_name
 
 
 def tr(text):

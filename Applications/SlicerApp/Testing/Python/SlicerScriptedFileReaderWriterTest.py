@@ -53,8 +53,7 @@ class SlicerScriptedFileReaderWriterTestFileReader:
         firstLine = ""
         with open(filePath) as f:
             firstLine = f.readline()
-        validFile = "magic" in firstLine
-        return validFile
+        return "magic" in firstLine
 
     def load(self, properties):
         try:
@@ -149,10 +148,14 @@ class SlicerScriptedFileReaderWriterTestTest(ScriptedLoadableModuleTest):
 
     def setUp(self):
         self.tempDir = slicer.util.tempDirectory()
-        logging.info("tempDir: " + self.tempDir)
+        logging.info(f"tempDir: {self.tempDir}")
         self.textInNode = "This is\nsome example test"
-        self.validFilename = self.tempDir + "/tempSlicerScriptedFileReaderWriterTestValid.mft"
-        self.invalidFilename = self.tempDir + "/tempSlicerScriptedFileReaderWriterTestInvalid.mft"
+        self.validFilename = (
+            f"{self.tempDir}/tempSlicerScriptedFileReaderWriterTestValid.mft"
+        )
+        self.invalidFilename = (
+            f"{self.tempDir}/tempSlicerScriptedFileReaderWriterTestInvalid.mft"
+        )
         slicer.mrmlScene.Clear()
 
     def tearDown(self):

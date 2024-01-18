@@ -261,20 +261,17 @@ class SlicerTransformInteractionTest1Test(ScriptedLoadableModuleTest):
         scaling.Scale(scale[0], scale[1], scale[2])
         tNode.ApplyTransformMatrix(scaling.GetMatrix())
 
-        defaultPlusMovePlusRotationPlusScalingTransform = []
-        for i in range(4):
-            defaultPlusMovePlusRotationPlusScalingTransform.append(
-                [x * scale[i] for x in defaultPlusMovePlusRotationTransform[i]])
-
+        defaultPlusMovePlusRotationPlusScalingTransform = [
+            [x * scale[i] for x in defaultPlusMovePlusRotationTransform[i]]
+            for i in range(4)
+        ]
         representation.GetTransform(transform)
         self.assertTransform(transform, defaultPlusMovePlusRotationPlusScalingTransform)
 
-        # Transform the volume
-        volumePlusMovePlusRotationPlusScalingTransform = []
-        for i in range(4):
-            volumePlusMovePlusRotationPlusScalingTransform.append(
-                [x * scale[i] for x in volumePlusMovePlusRotationTransform[i]])
-
+        volumePlusMovePlusRotationPlusScalingTransform = [
+            [x * scale[i] for x in volumePlusMovePlusRotationTransform[i]]
+            for i in range(4)
+        ]
         volume.SetAndObserveTransformNodeID(tNode.GetID())
         tdNode.UpdateEditorBounds()
         representation.GetTransform(transform)

@@ -28,9 +28,7 @@ class SegmentEditorLogicalEffect(AbstractScriptedSegmentEditorEffect):
 
     def icon(self):
         iconPath = os.path.join(os.path.dirname(__file__), "Resources/Icons/Logical.png")
-        if os.path.exists(iconPath):
-            return qt.QIcon(iconPath)
-        return qt.QIcon()
+        return qt.QIcon(iconPath) if os.path.exists(iconPath) else qt.QIcon()
 
     def helpText(self):
         return "<html>" + _("""Apply logical operators or combine segments<br>. Available operations:<p>
@@ -60,10 +58,12 @@ segment list in effect options - below.
 
         self.bypassMaskingCheckBox = qt.QCheckBox(_("Bypass masking"))
         self.bypassMaskingCheckBox.setToolTip(_("Ignore all masking options and only modify the selected segment."))
-        self.bypassMaskingCheckBox.objectName = self.__class__.__name__ + "BypassMasking"
+        self.bypassMaskingCheckBox.objectName = (
+            f"{self.__class__.__name__}BypassMasking"
+        )
 
         self.applyButton = qt.QPushButton(_("Apply"))
-        self.applyButton.objectName = self.__class__.__name__ + "Apply"
+        self.applyButton.objectName = f"{self.__class__.__name__}Apply"
 
         operationFrame = qt.QHBoxLayout()
         operationFrame.addWidget(self.methodSelectorComboBox)
@@ -107,9 +107,7 @@ segment list in effect options - below.
             # Avoid logging warning
             return ""
         modifierSegmentIDs = self.scriptedEffect.parameter("ModifierSegmentID").split(";")
-        if not modifierSegmentIDs:
-            return ""
-        return modifierSegmentIDs[0]
+        return "" if not modifierSegmentIDs else modifierSegmentIDs[0]
 
     def updateGUIFromMRML(self):
         operation = self.scriptedEffect.parameter("Operation")
@@ -263,7 +261,7 @@ segment list in effect options - below.
             self.scriptedEffect.modifySelectedSegmentByLabelmap(
                 invertedSelectedSegmentLabelmap, slicer.qSlicerSegmentEditorAbstractEffect.ModificationModeSet, bypassMasking)
 
-        elif operation == LOGICAL_CLEAR or operation == LOGICAL_FILL:
+        elif operation in [LOGICAL_CLEAR, LOGICAL_FILL]:
             selectedSegmentLabelmap = self.scriptedEffect.selectedSegmentLabelmap()
             vtkSegmentationCore.vtkOrientedImageDataResample.FillImage(
                 selectedSegmentLabelmap, 1 if operation == LOGICAL_FILL else 0, selectedSegmentLabelmap.GetExtent())

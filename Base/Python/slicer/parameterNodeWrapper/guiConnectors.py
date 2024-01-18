@@ -144,9 +144,7 @@ def parameterNodeGuiConnector(classtype=None):
         return _processGuiConnector(cls)
 
     # See if we're being called as @parameterNodeGuiConnector or @parameterNodeGuiConnector().
-    if classtype is None:
-        return wrap
-    return wrap(classtype)
+    return wrap if classtype is None else wrap(classtype)
 
 
 @parameterNodeGuiConnector
@@ -315,21 +313,17 @@ class QDoubleSpinBoxCtkSliderWidgetToFloatConnector(GuiConnector):
 
         isBounded = withinRange is not None or minimum is not None and maximum is not None
 
-        if (isinstance(widget, ctk.ctkSliderWidget) or isinstance(widget, slicer.qMRMLSliderWidget)) and not isBounded:
+        if (
+            isinstance(widget, (ctk.ctkSliderWidget, slicer.qMRMLSliderWidget))
+        ) and not isBounded:
             raise RuntimeError("Cannot have a connection to ctkSliderWidget where the float types is unbounded.")
 
         if withinRange is not None:
             self._widget.minimum = withinRange.minimum
             self._widget.maximum = withinRange.maximum
         else:
-            if minimum is not None:
-                self._widget.minimum = minimum.minimum
-            else:
-                self._widget.minimum = float("-inf")
-            if maximum is not None:
-                self._widget.maximum = maximum.maximum
-            else:
-                self._widget.maximum = float("inf")
+            self._widget.minimum = float("-inf") if minimum is None else minimum.minimum
+            self._widget.maximum = maximum.maximum if maximum is not None else float("inf")
 
     def _connect(self):
         self._widget.valueChanged.connect(self.changed)
@@ -680,9 +674,11 @@ def _extractCorrectWidgets(widget):
     ids = [[id(w) for w in ww] for ww in parentStacks]
     parentStacks, _ = zip(*sorted(zip(parentStacks, ids), key=lambda w: w[1]))
 
-    leafParentStacks = [i for i, j in zip(parentStacks[:-1], parentStacks[1:]) if not i == j[:len(i)]] \
-        + [parentStacks[-1]]
-    return leafParentStacks
+    return [
+        i
+        for i, j in zip(parentStacks[:-1], parentStacks[1:])
+        if i != j[: len(i)]
+    ] + [parentStacks[-1]]
 
 
 def _getDottedParameterName(parentStack):

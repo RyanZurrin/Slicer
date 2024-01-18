@@ -100,13 +100,13 @@ class ScenePerformanceWidget(ScriptedLoadableModuleWidget):
             self.ResultsTextEdit.append(results)
 
     def updateActionProperties(self):
-        enableAddData = True if self.ActionComboBox.currentIndex == 0 else False
+        enableAddData = self.ActionComboBox.currentIndex == 0
         self.ActionPathLineEdit.setEnabled(enableAddData)
         self.URLLineEdit.setEnabled(enableAddData)
         self.URLFileNameLineEdit.setEnabled(enableAddData)
-        self.SceneViewSpinBox.setEnabled(True if self.ActionComboBox.currentIndex == 1 else False)
-        self.LayoutSpinBox.setEnabled(True if self.ActionComboBox.currentIndex == 3 else False)
-        self.MRMLNodeComboBox.setEnabled(True if self.ActionComboBox.currentIndex == 4 or self.ActionComboBox.currentIndex == 5 else False)
+        self.SceneViewSpinBox.setEnabled(self.ActionComboBox.currentIndex == 1)
+        self.LayoutSpinBox.setEnabled(self.ActionComboBox.currentIndex == 3)
+        self.MRMLNodeComboBox.setEnabled(self.ActionComboBox.currentIndex in [4, 5])
 
     def findWidget(self, widget, objectName):
         return slicer.util.findChildren(widget, objectName)[0]
@@ -148,8 +148,11 @@ class ScenePerformanceTest(ScriptedLoadableModuleTest):
     def testAll(self):
         self.setUp()
 
-        self.addURLData(TESTING_DATA_URL + "SHA256/688ebcc6f45989795be2bcdc6b8b5bfc461f1656d677ed3ddef8c313532687f1",
-                        "BrainAtlas2012.mrb", "SHA256:688ebcc6f45989795be2bcdc6b8b5bfc461f1656d677ed3ddef8c313532687f1")
+        self.addURLData(
+            f"{TESTING_DATA_URL}SHA256/688ebcc6f45989795be2bcdc6b8b5bfc461f1656d677ed3ddef8c313532687f1",
+            "BrainAtlas2012.mrb",
+            "SHA256:688ebcc6f45989795be2bcdc6b8b5bfc461f1656d677ed3ddef8c313532687f1",
+        )
         self.modifyNodeByID("vtkMRMLScalarVolumeNode1")
         self.modifyNodeByID("vtkMRMLScalarVolumeNode2")
         self.modifyNodeByID("vtkMRMLScalarVolumeNode3")
@@ -190,7 +193,7 @@ class ScenePerformanceTest(ScriptedLoadableModuleTest):
         self.delayDisplay("Starting the AddData test")
         logic = ScenePerformanceLogic()
         averageTime = 0
-        for x in range(self.Repeat):
+        for _ in range(self.Repeat):
             logic.startTiming()
             ioManager = slicer.app.ioManager()
             ioManager.loadFile(file)
@@ -204,7 +207,7 @@ class ScenePerformanceTest(ScriptedLoadableModuleTest):
         self.delayDisplay("Starting the Close Scene test")
         logic = ScenePerformanceLogic()
         averageTime = 0
-        for x in range(self.Repeat):
+        for _ in range(self.Repeat):
             logic.startTiming()
             slicer.mrmlScene.Clear(0)
             time = logic.stopTiming()
@@ -221,7 +224,7 @@ class ScenePerformanceTest(ScriptedLoadableModuleTest):
         self.delayDisplay("Starting the Restore Scene test")
         logic = ScenePerformanceLogic()
         averageTime = 0
-        for x in range(self.Repeat):
+        for _ in range(self.Repeat):
             logic.startTiming()
             node.RestoreScene()
             time = logic.stopTiming()
@@ -234,7 +237,7 @@ class ScenePerformanceTest(ScriptedLoadableModuleTest):
         self.delayDisplay("Starting the layout test")
         logic = ScenePerformanceLogic()
         averageTime = 0
-        for x in range(self.Repeat):
+        for _ in range(self.Repeat):
             logic.startTiming()
             layoutManager = slicer.app.layoutManager()
             layoutManager.setLayout(layoutIndex)
@@ -252,7 +255,7 @@ class ScenePerformanceTest(ScriptedLoadableModuleTest):
         self.delayDisplay("Starting the add node test")
         logic = ScenePerformanceLogic()
         averageTime = 0
-        for x in range(self.Repeat):
+        for _ in range(self.Repeat):
             newNode = node.CreateNodeInstance()
             newNode.UnRegister(node)
             newNode.Copy(node)
@@ -272,7 +275,7 @@ class ScenePerformanceTest(ScriptedLoadableModuleTest):
         self.delayDisplay("Starting the modify node test")
         logic = ScenePerformanceLogic()
         averageTime = 0
-        for x in range(self.Repeat):
+        for _ in range(self.Repeat):
             logic.startTiming()
             node.Modified()
             time = logic.stopTiming()

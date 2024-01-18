@@ -156,12 +156,17 @@ class ColorLegendSelfTestTest(ScriptedLoadableModuleTest):
             "Yellow": [1.0, 1.0, 0.0],
         }
         for sliceName, titleColor in sliceNameColor.items():
-            self.delayDisplay("Test color legend on the " + sliceName + " slice view", self.delayMs)
+            self.delayDisplay(
+                f"Test color legend on the {sliceName} slice view", self.delayMs
+            )
             sliceNode = slicer.app.layoutManager().sliceWidget(sliceName).mrmlSliceNode()
             colorLegend.SetViewNodeIDs([sliceNode.GetID()])
             colorLegend.SetTitleText(sliceName)
             colorLegend.GetTitleTextProperty().SetColor(titleColor)
-            self.delayDisplay("Test color legend on the " + sliceName + " slice view finished!", self.delayMs * 2)
+            self.delayDisplay(
+                f"Test color legend on the {sliceName} slice view finished!",
+                self.delayMs * 2,
+            )
 
         colorLegend.SetVisibility(False)
 

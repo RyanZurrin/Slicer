@@ -40,16 +40,18 @@ class SegmentationsModuleTest1(unittest.TestCase):
     # ------------------------------------------------------------------------------
     def TestSection_SetupPathsAndNames(self):
         # Set up paths used for this test
-        self.segmentationsModuleTestDir = slicer.app.temporaryPath + "/SegmentationsModuleTest"
+        self.segmentationsModuleTestDir = (
+            f"{slicer.app.temporaryPath}/SegmentationsModuleTest"
+        )
         if not os.access(self.segmentationsModuleTestDir, os.F_OK):
             os.mkdir(self.segmentationsModuleTestDir)
 
-        self.dataDir = self.segmentationsModuleTestDir + "/TinyPatient_Seg"
+        self.dataDir = f"{self.segmentationsModuleTestDir}/TinyPatient_Seg"
         if not os.access(self.dataDir, os.F_OK):
             os.mkdir(self.dataDir)
-        self.dataSegDir = self.dataDir + "/TinyPatient_Structures.seg"
+        self.dataSegDir = f"{self.dataDir}/TinyPatient_Structures.seg"
 
-        self.dataZipFilePath = self.segmentationsModuleTestDir + "/TinyPatient_Seg.zip"
+        self.dataZipFilePath = f"{self.segmentationsModuleTestDir}/TinyPatient_Seg.zip"
 
         # Define variables
         self.expectedNumOfFilesInDataDir = 4
@@ -67,14 +69,28 @@ class SegmentationsModuleTest1(unittest.TestCase):
     def TestSection_RetrieveInputData(self):
         try:
             slicer.util.downloadAndExtractArchive(
-                TESTING_DATA_URL + "SHA256/b902f635ef2059cd3b4ba854c000b388e4a9e817a651f28be05c22511a317ec7",
-                self.dataZipFilePath, self.segmentationsModuleTestDir,
-                checksum="SHA256:b902f635ef2059cd3b4ba854c000b388e4a9e817a651f28be05c22511a317ec7")
+                f"{TESTING_DATA_URL}SHA256/b902f635ef2059cd3b4ba854c000b388e4a9e817a651f28be05c22511a317ec7",
+                self.dataZipFilePath,
+                self.segmentationsModuleTestDir,
+                checksum="SHA256:b902f635ef2059cd3b4ba854c000b388e4a9e817a651f28be05c22511a317ec7",
+            )
 
-            numOfFilesInDataDirTest = len([name for name in os.listdir(self.dataDir) if os.path.isfile(self.dataDir + "/" + name)])
+            numOfFilesInDataDirTest = len(
+                [
+                    name
+                    for name in os.listdir(self.dataDir)
+                    if os.path.isfile(f"{self.dataDir}/{name}")
+                ]
+            )
             self.assertEqual(numOfFilesInDataDirTest, self.expectedNumOfFilesInDataDir)
             self.assertTrue(os.access(self.dataSegDir, os.F_OK))
-            numOfFilesInDataSegDirTest = len([name for name in os.listdir(self.dataSegDir) if os.path.isfile(self.dataSegDir + "/" + name)])
+            numOfFilesInDataSegDirTest = len(
+                [
+                    name
+                    for name in os.listdir(self.dataSegDir)
+                    if os.path.isfile(f"{self.dataSegDir}/{name}")
+                ]
+            )
             self.assertEqual(numOfFilesInDataSegDirTest, self.expectedNumOfFilesInDataSegDir)
 
         except Exception as e:
@@ -86,8 +102,12 @@ class SegmentationsModuleTest1(unittest.TestCase):
     # ------------------------------------------------------------------------------
     def TestSection_LoadInputData(self):
         # Load into Slicer
-        slicer.util.loadVolume(self.dataDir + "/TinyPatient_CT.nrrd")
-        slicer.util.loadNodeFromFile(self.dataDir + "/TinyPatient_Structures.seg.vtm", "SegmentationFile", {})
+        slicer.util.loadVolume(f"{self.dataDir}/TinyPatient_CT.nrrd")
+        slicer.util.loadNodeFromFile(
+            f"{self.dataDir}/TinyPatient_Structures.seg.vtm",
+            "SegmentationFile",
+            {},
+        )
 
         # Change source representation to closed surface (so that conversion is possible when adding segment)
         self.inputSegmentationNode = slicer.util.getNode("vtkMRMLSegmentationNode1")

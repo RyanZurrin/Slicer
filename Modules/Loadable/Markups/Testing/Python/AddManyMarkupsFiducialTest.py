@@ -170,7 +170,7 @@ class AddManyMarkupsFiducialTestLogic(ScriptedLoadableModuleLogic):
             print("Pause render")
             slicer.app.pauseRender()
 
-        for nodeIndex in range(numberOfNodes):
+        for _ in range(numberOfNodes):
             markupsNode = slicer.mrmlScene.AddNewNodeByClass(nodeType)
             markupsNode.CreateDefaultDisplayNodes()
             if locked:

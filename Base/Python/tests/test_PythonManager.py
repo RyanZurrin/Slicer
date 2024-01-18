@@ -24,8 +24,10 @@ class PythonManagerTests(unittest.TestCase):
 
         for test_string in test_strings:
             test_string_literal = slicer.app.pythonManager().toPythonStringLiteral(test_string)
-            exec("test_string_literal_value = " + test_string_literal, globals())
-            print("Test: " + test_string + " -> " + test_string_literal + " -> " + test_string_literal_value)
+            exec(f"test_string_literal_value = {test_string_literal}", globals())
+            print(
+                f"Test: {test_string} -> {test_string_literal} -> {test_string_literal_value}"
+            )
             self.assertEqual(test_string, test_string_literal_value)
 
     def tearDown(self):

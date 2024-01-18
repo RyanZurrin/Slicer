@@ -159,7 +159,7 @@ class AtlasTestsTest(ScriptedLoadableModuleTest):
         downloads = {
             "fileNames": "Abdominal_Atlas_2012.mrb",
             "loadFiles": True,
-            "uris": TESTING_DATA_URL + "SHA256/5d315abf7d303326669c6075f9eea927eeda2e531a5b1662cfa505806cb498ea",
+            "uris": f"{TESTING_DATA_URL}SHA256/5d315abf7d303326669c6075f9eea927eeda2e531a5b1662cfa505806cb498ea",
             "checksums": "SHA256:5d315abf7d303326669c6075f9eea927eeda2e531a5b1662cfa505806cb498ea",
         }
         self.perform_AtlasTest(downloads, "I")
@@ -169,7 +169,7 @@ class AtlasTestsTest(ScriptedLoadableModuleTest):
         downloads = {
             "fileNames": "BrainAtlas2012.mrb",
             "loadFiles": True,
-            "uris": TESTING_DATA_URL + "SHA256/688ebcc6f45989795be2bcdc6b8b5bfc461f1656d677ed3ddef8c313532687f1",
+            "uris": f"{TESTING_DATA_URL}SHA256/688ebcc6f45989795be2bcdc6b8b5bfc461f1656d677ed3ddef8c313532687f1",
             "checksums": "SHA256:688ebcc6f45989795be2bcdc6b8b5bfc461f1656d677ed3ddef8c313532687f1",
         }
         self.perform_AtlasTest(downloads, "A1_grayT1")
@@ -179,7 +179,7 @@ class AtlasTestsTest(ScriptedLoadableModuleTest):
         downloads = {
             "fileNames": "KneeAtlas2012.mrb",
             "loadFiles": True,
-            "uris": TESTING_DATA_URL + "SHA256/5d5506c07c238918d0c892e7b04c26ad7f43684d89580780bb207d1d860b0b33",
+            "uris": f"{TESTING_DATA_URL}SHA256/5d5506c07c238918d0c892e7b04c26ad7f43684d89580780bb207d1d860b0b33",
             "checksums": "SHA256:5d5506c07c238918d0c892e7b04c26ad7f43684d89580780bb207d1d860b0b33",
         }
         self.perform_AtlasTest(downloads, "I")
@@ -229,24 +229,28 @@ class AtlasTestsTest(ScriptedLoadableModuleTest):
                 mhd = mh.GetDisplayNode()
                 # manually added hierarchies may not have display nodes, skip
                 if mhd is None:
-                    self.delayDisplay("Skipping model hierarchy with no display node " + mh.GetName())
+                    self.delayDisplay(
+                        f"Skipping model hierarchy with no display node {mh.GetName()}"
+                    )
                 else:
                     hierarchyManipulating += 1
-                    self.delayDisplay("Manipulating model hierarchy " + mh.GetName() + " (" + str(hierarchyManipulating) + "/" + str(numModelHierarchiesToManipulate) + ")")
+                    self.delayDisplay(
+                        f"Manipulating model hierarchy {mh.GetName()} ({hierarchyManipulating}/{str(numModelHierarchiesToManipulate)})"
+                    )
                     hierarchyOriginalColor = mhd.GetColor()
                     hierarchyOriginalVisibility = mhd.GetVisibility()
                     hierarchyOriginalExpanded = mh.GetExpanded()
                     # collapse and change the color on the hierarchy to full red
                     mh.SetExpanded(0)
-                    self.delayDisplay("Model hierarchy " + mh.GetName() + ": expanded = false")
+                    self.delayDisplay(f"Model hierarchy {mh.GetName()}: expanded = false")
                     mhd.SetColor(1, 0, 0)
-                    self.delayDisplay("Model hierarchy " + mh.GetName() + ": color = red")
+                    self.delayDisplay(f"Model hierarchy {mh.GetName()}: color = red")
                     # set the collapsed visibility to 0
                     mhd.SetVisibility(0)
-                    self.delayDisplay("Model hierarchy " + mh.GetName() + ": visibility = off")
+                    self.delayDisplay(f"Model hierarchy {mh.GetName()}: visibility = off")
                     # expand, should see all models in correct color
                     mh.SetExpanded(1)
-                    self.delayDisplay("Model hierarchy " + mh.GetName() + ": expanded = true")
+                    self.delayDisplay(f"Model hierarchy {mh.GetName()}: expanded = true")
                     # reset the hierarchy
                     mhd.SetVisibility(hierarchyOriginalVisibility)
                     mhd.SetColor(hierarchyOriginalColor)
@@ -260,7 +264,9 @@ class AtlasTestsTest(ScriptedLoadableModuleTest):
         numSceneViews = slicer.mrmlScene.GetNumberOfNodesByClass("vtkMRMLSceneViewNode")
         for s in range(numSceneViews):
             sv = slicer.mrmlScene.GetNthNodeByClass(s, "vtkMRMLSceneViewNode")
-            self.delayDisplay("Restoring scene " + sv.GetName() + " (" + str(s + 1) + "/" + str(numSceneViews) + ")")
+            self.delayDisplay(
+                f"Restoring scene {sv.GetName()} ({str(s + 1)}/{str(numSceneViews)})"
+            )
             sv.RestoreScene()
 
         self.delayDisplay("Test passed!")

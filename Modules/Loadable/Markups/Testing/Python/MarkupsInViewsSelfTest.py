@@ -183,14 +183,19 @@ class MarkupsInViewsSelfTestLogic(ScriptedLoadableModuleLogic):
         if selectionNode is not None:
             selectionNode.SetReferenceActivePlaceNodeID(fidNode.GetID())
 
-        fidNodeObserverTags = []
         self.nodeEvents = []
         observedEvents = [
             slicer.vtkMRMLMarkupsNode.PointPositionDefinedEvent,
             slicer.vtkMRMLMarkupsNode.PointPositionUndefinedEvent]
-        for eventId in observedEvents:
-            fidNodeObserverTags.append(fidNode.AddObserver(eventId, lambda caller, event, eventId=eventId: self.onRecordNodeEvent(caller, event, eventId)))
-
+        fidNodeObserverTags = [
+            fidNode.AddObserver(
+                eventId,
+                lambda caller, event, eventId=eventId: self.onRecordNodeEvent(
+                    caller, event, eventId
+                ),
+            )
+            for eventId in observedEvents
+        ]
         # add some known points to it
         eye1 = [33.4975, 79.4042, -10.2143]
         eye2 = [-31.283, 80.9652, -16.2143]
@@ -304,8 +309,14 @@ class MarkupsInViewsSelfTestLogic(ScriptedLoadableModuleLogic):
         # self.printViewNodeIDs(displayNode)
         displayNode.AddViewNodeID("vtkMRMLSliceNodeGreen")
         slicer.util.delayDisplay("Show only in green slice")
-        if (self.controlPointVisibleSlice(fidNode, "vtkMRMLSliceNodeRed", controlPointIndex)
-                or not self.controlPointVisibleSlice(fidNode, "vtkMRMLSliceNodeGreen", controlPointIndex)):
+        if self.controlPointVisibleSlice(fidNode, "vtkMRMLSliceNodeRed", controlPointIndex):
+            slicer.util.delayDisplay("Test failed: widget not displayed only on green slice")
+            print("\tred = ", self.controlPointVisibleSlice(fidNode, "vtkMRMLSliceNodeRed", controlPointIndex))
+            print("\tgreen =", self.controlPointVisibleSlice(fidNode, "vtkMRMLSliceNodeGreen", controlPointIndex))
+            self.printViewNodeIDs(displayNode)
+            return False
+
+        elif not self.controlPointVisibleSlice(fidNode, "vtkMRMLSliceNodeGreen", controlPointIndex):
             slicer.util.delayDisplay("Test failed: widget not displayed only on green slice")
             print("\tred = ", self.controlPointVisibleSlice(fidNode, "vtkMRMLSliceNodeRed", controlPointIndex))
             print("\tgreen =", self.controlPointVisibleSlice(fidNode, "vtkMRMLSliceNodeGreen", controlPointIndex))

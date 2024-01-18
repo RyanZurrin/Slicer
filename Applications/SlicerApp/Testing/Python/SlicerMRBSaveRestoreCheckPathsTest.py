@@ -125,7 +125,7 @@ class SlicerMRBSaveRestoreCheckPaths(ScriptedLoadableModuleTest):
     def checkSceneViewFileNames(self, scene):
         # check for any scene views
         numberOfSceneViews = scene.GetNumberOfNodesByClass("vtkMRMLSceneViewNode")
-        slicer.util.delayDisplay("Number of scene views = " + str(numberOfSceneViews))
+        slicer.util.delayDisplay(f"Number of scene views = {str(numberOfSceneViews)}")
         if numberOfSceneViews == 0:
             return
         for n in range(numberOfSceneViews):
@@ -149,8 +149,8 @@ class SlicerMRBSaveRestoreCheckPaths(ScriptedLoadableModuleTest):
         """
 
         print("Running SlicerMRBSaveRestoreCheckPaths Test case with:")
-        print("uniqueDirectory : %s" % self.uniqueDirectory)
-        print("strict : %s" % self.strict)
+        print(f"uniqueDirectory : {self.uniqueDirectory}")
+        print(f"strict : {self.strict}")
         print("files deleted after load: %d" % self.mrbDeleteFilesAfterLoad)
 
         #
@@ -181,14 +181,16 @@ class SlicerMRBSaveRestoreCheckPaths(ScriptedLoadableModuleTest):
         # point with the volume saved in a regular directory
         #
         tempDir = slicer.util.tempDirectory("__mrml__")
-        slicer.util.delayDisplay("Temp dir = %s " % tempDir)
-        mrmlFilePath = tempDir + "/SlicerMRBSaveRestoreCheckPath.mrml"
+        slicer.util.delayDisplay(f"Temp dir = {tempDir} ")
+        mrmlFilePath = f"{tempDir}/SlicerMRBSaveRestoreCheckPath.mrml"
         slicer.mrmlScene.SetURL(mrmlFilePath)
         slicer.util.delayDisplay(f"Saving mrml file to {mrmlFilePath}, current url of scene is {slicer.mrmlScene.GetURL()}")
         # saveScene just writes out the .mrml file
         self.assertTrue(ioManager.saveScene(mrmlFilePath, screenShot))
         slicer.util.delayDisplay(f"Finished saving mrml file {mrmlFilePath}, mrml url is now {slicer.mrmlScene.GetURL()}\n\n\n")
-        slicer.util.delayDisplay("mrml root dir = %s" % slicer.mrmlScene.GetRootDirectory())
+        slicer.util.delayDisplay(
+            f"mrml root dir = {slicer.mrmlScene.GetRootDirectory()}"
+        )
         # explicitly save MRHead
         ioManager.addDefaultStorageNodes()
         mrHeadVolume.GetStorageNode().WriteData(mrHeadVolume)

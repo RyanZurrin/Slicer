@@ -46,11 +46,10 @@ def splitPossiblyDottedName(possiblyDottedName):
       "x" -> ("x", None)
       "x.y.z" -> ("x", "y.z")
     """
-    if "." in possiblyDottedName:
-        split = possiblyDottedName.split(".", maxsplit=1)
-        return split[0], split[1]
-    else:
+    if "." not in possiblyDottedName:
         return possiblyDottedName, None
+    split = possiblyDottedName.split(".", maxsplit=1)
+    return split[0], split[1]
 
 
 def isNodeOrUnionOfNodes(datatype) -> bool:
@@ -63,14 +62,13 @@ def isNodeOrUnionOfNodes(datatype) -> bool:
     if dataIsNode:
         return True
 
-    # check union node case
     elif typing.get_origin(underlyingDataType) == typing.Union:
         underlyingArgTypes = [unannotatedType(arg) for arg in typing.get_args(underlyingDataType)]
 
         def validType(type_):
             return isinstance(None, type_) or issubclass(type_, slicer.vtkMRMLNode) if type(type_) == type else False
 
-        return all([validType(t) for t in underlyingArgTypes])
+        return all(validType(t) for t in underlyingArgTypes)
     else:
         return False
 

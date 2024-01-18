@@ -193,7 +193,7 @@ for kit in available_kits:
         continue
 
     try:
-        exec("from %s import *" % (kit))
+        exec(f"from {kit} import *")
     except ImportError as detail:
         print(detail)
 

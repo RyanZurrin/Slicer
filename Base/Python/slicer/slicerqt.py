@@ -125,7 +125,7 @@ def loadSlicerRCFile():
 
     rcfile = getSlicerRCFileName()
     if os.path.isfile(rcfile):
-        print("Loading Slicer RC file [%s]" % (rcfile))
+        print(f"Loading Slicer RC file [{rcfile}]")
         exec(open(rcfile).read(), globals())
 
 
@@ -194,10 +194,10 @@ class _Internal:
 
     def unsetSlicerModule(self, moduleName):
         """Remove attribute from ``slicer.modules``"""
-        if hasattr(slicer.modules, moduleName + "Instance"):
-            delattr(slicer.modules, moduleName + "Instance")
-        if hasattr(slicer.modules, moduleName + "Widget"):
-            delattr(slicer.modules, moduleName + "Widget")
+        if hasattr(slicer.modules, f"{moduleName}Instance"):
+            delattr(slicer.modules, f"{moduleName}Instance")
+        if hasattr(slicer.modules, f"{moduleName}Widget"):
+            delattr(slicer.modules, f"{moduleName}Widget")
         if hasattr(slicer.moduleNames, moduleName):
             delattr(slicer.moduleNames, moduleName)
         delattr(slicer.modules, moduleName.lower())

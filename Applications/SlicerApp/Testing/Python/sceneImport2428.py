@@ -144,12 +144,12 @@ class sceneImport2428Test(ScriptedLoadableModuleTest):
 
         self.delayDisplay("Building...")
 
-        parameters = {}
-        parameters["InputVolume"] = headLabel.GetID()
-        # create models for all labels
-        parameters["JointSmoothing"] = True
-        parameters["StartLabel"] = -1
-        parameters["EndLabel"] = -1
+        parameters = {
+            "InputVolume": headLabel.GetID(),
+            "JointSmoothing": True,
+            "StartLabel": -1,
+            "EndLabel": -1,
+        }
         outHierarchy = slicer.vtkMRMLModelHierarchyNode()
         outHierarchy.SetScene(slicer.mrmlScene)
         outHierarchy.SetName("sceneImport2428Hierachy")

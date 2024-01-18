@@ -48,8 +48,12 @@ def registerEffects():
     for editorEffectName in SegmentEditorEffects.editorEffectNames:
         try:
             instance = qSlicerSegmentationsEditorEffects.qSlicerSegmentEditorScriptedEffect(None)
-            effectFilename = effectsPath + "/" + editorEffectName + ".py"
+            effectFilename = f"{effectsPath}/{editorEffectName}.py"
             instance.setPythonSource(effectFilename)
             instance.self().register()
         except Exception as e:
-            logging.error("Error instantiating " + editorEffectName + ":\n" + traceback.format_exc())
+            logging.error(
+                f"Error instantiating {editorEffectName}"
+                + ":\n"
+                + traceback.format_exc()
+            )

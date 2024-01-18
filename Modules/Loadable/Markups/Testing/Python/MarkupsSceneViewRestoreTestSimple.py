@@ -42,5 +42,7 @@ print("Difference between coordinates after restored the scene and value from ju
 diffTotal = xdiff + ydiff + zdiff
 
 if diffTotal > 0.1:
-    exceptionMessage = "Difference between coordinate values total = " + str(diffTotal)
+    exceptionMessage = (
+        f"Difference between coordinate values total = {str(diffTotal)}"
+    )
     raise Exception(exceptionMessage)

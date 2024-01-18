@@ -153,14 +153,16 @@ class SegmentationWidgetsTest1(ScriptedLoadableModuleTest):
         orientedImageData.GetDirections(actualDirections)
         for i in [0, 1, 2]:
             if not numpy.isclose(spacing[i], actualSpacing[i], tolerance):
-                logging.warning("Spacing discrepancy: " + str(spacing) + " != " + str(actualSpacing))
+                logging.warning(f"Spacing discrepancy: {str(spacing)} != {str(actualSpacing)}")
                 return False
             if not numpy.isclose(origin[i], actualOrigin[i], tolerance):
-                logging.warning("Origin discrepancy: " + str(origin) + " != " + str(actualOrigin))
+                logging.warning(f"Origin discrepancy: {str(origin)} != {str(actualOrigin)}")
                 return False
             for j in [0, 1, 2]:
                 if not numpy.isclose(directions[i][j], actualDirections[i][j], tolerance):
-                    logging.warning("Directions discrepancy: " + str(directions) + " != " + str(actualDirections))
+                    logging.warning(
+                        f"Directions discrepancy: {str(directions)} != {actualDirections}"
+                    )
                     return False
         return True
 

@@ -48,7 +48,7 @@ class IsNone(Validator):
     """Validates that the input value is None."""
 
     def __repr__(self) -> str:
-        return f"IsNone()"
+        return "IsNone()"
 
     def validate(self, value) -> None:
         if value is not None:
@@ -59,7 +59,7 @@ class NotNone(Validator):
     """Validates that any input value is not None."""
 
     def __repr__(self) -> str:
-        return f"NotNone()"
+        return "NotNone()"
 
     def validate(self, value) -> None:
         if value is None:

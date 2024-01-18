@@ -146,8 +146,7 @@ class CropVolumeSequenceWidget(ScriptedLoadableModuleWidget):
         if self.inputSelector.currentNode():
             inputVolSeq = self.inputSelector.currentNode()
             seqBrowser = slicer.modules.sequences.logic().GetFirstBrowserNodeForSequenceNode(inputVolSeq)
-            inputVolume = seqBrowser.GetProxyNode(inputVolSeq)
-            if inputVolume:
+            if inputVolume := seqBrowser.GetProxyNode(inputVolSeq):
                 self.cropParametersSelector.currentNode().SetInputVolumeNodeID(inputVolume.GetID())
         slicer.app.openNodeModule(self.cropParametersSelector.currentNode())
 
@@ -176,9 +175,7 @@ class CropVolumeSequenceLogic(ScriptedLoadableModuleLogic):
         if not seqBrowser:
             return None
         proxyVolume = seqBrowser.GetProxyNode(volumeSeq)
-        if not proxyVolume:
-            return None
-        return proxyVolume.GetTransformNodeID()
+        return None if not proxyVolume else proxyVolume.GetTransformNodeID()
 
     def run(self, inputVolSeq, outputVolSeq, cropParameters):
         """Run the actual algorithm"""
