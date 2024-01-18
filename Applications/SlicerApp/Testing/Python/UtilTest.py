@@ -40,7 +40,7 @@ class UtilTestWidget(ScriptedLoadableModuleWidget):
 
         moduleName = "UtilTest"
         scriptedModulesPath = os.path.dirname(slicer.util.modulePath(moduleName))
-        path = os.path.join(scriptedModulesPath, "Resources", "UI", moduleName + ".ui")
+        path = os.path.join(scriptedModulesPath, "Resources", "UI", f"{moduleName}.ui")
 
         self.Widget = slicer.util.loadUI(path)
         self.layout.addWidget(self.Widget)

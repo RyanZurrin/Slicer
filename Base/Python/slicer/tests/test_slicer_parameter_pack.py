@@ -8,8 +8,7 @@ from slicer.parameterNodeWrapper.parameterPack import ParameterPackSerializer
 
 
 def newParameterNode():
-    node = slicer.mrmlScene.AddNewNodeByClass("vtkMRMLScriptedModuleNode")
-    return node
+    return slicer.mrmlScene.AddNewNodeByClass("vtkMRMLScriptedModuleNode")
 
 
 @parameterPack

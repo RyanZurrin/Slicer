@@ -190,9 +190,7 @@ def parameterNodeSerializer(classtype=None):
         return _processSerializer(cls)
 
     # See if we're being called as @parameterNodeSerializer or @parameterNodeSerializer().
-    if classtype is None:
-        return wrap
-    return wrap(classtype)
+    return wrap if classtype is None else wrap(classtype)
 
 
 def extractSerializer(annotations):
@@ -686,7 +684,7 @@ class TupleSerializer(Serializer):
         because it might lead to unexpected behavior. In this case modifying the element of the
         tuple will not update the underlying parameter node, which can be confusing.
         """
-        return all([s.supportsCaching() for s in self._serializers])
+        return all(s.supportsCaching() for s in self._serializers)
 
 
 class ObservedDict(collections.abc.MutableMapping):
@@ -908,10 +906,10 @@ class UnionSerializer(Serializer):
         return f"{name}.{index}"
 
     def isIn(self, parameterNode, name: str) -> bool:
-        for index, validatedSerializer in enumerate(self._serializers):
-            if validatedSerializer.isIn(parameterNode, self._paramName(name, index)):
-                return True
-        return False
+        return any(
+            validatedSerializer.isIn(parameterNode, self._paramName(name, index))
+            for index, validatedSerializer in enumerate(self._serializers)
+        )
 
     def _findBestSerializer(self, value):
         # canSerialize does a good job most of the time at differentiating between different
@@ -971,7 +969,7 @@ class UnionSerializer(Serializer):
         because it might lead to unexpected behavior. In this case modifying the element will
         not update the underlying parameter node, which can be confusing.
         """
-        return all([s.supportsCaching() for s in self._serializers])
+        return all(s.supportsCaching() for s in self._serializers)
 
 
 @parameterNodeSerializer
@@ -1044,9 +1042,7 @@ class AnySerializer(Serializer):
 
     @staticmethod
     def create(type_):
-        if AnySerializer.canSerialize(type_):
-            return AnySerializer()
-        return None
+        return AnySerializer() if AnySerializer.canSerialize(type_) else None
 
     @staticmethod
     def _typeName(name: str) -> str:
@@ -1061,10 +1057,9 @@ class AnySerializer(Serializer):
         if (modulename, classname) == ("builtins", "NoneType"):
             # "from builtins import NoneType" doesn't work
             return createSerializerFromAnnotatedType(type(None))
-        else:
-            mod = importlib.import_module(modulename)
-            type_ = getattr(mod, classname)
-            return createSerializerFromAnnotatedType(type_)
+        mod = importlib.import_module(modulename)
+        type_ = getattr(mod, classname)
+        return createSerializerFromAnnotatedType(type_)
 
     def __init__(self):
         # type is (modulename, classname)

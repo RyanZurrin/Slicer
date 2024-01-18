@@ -67,18 +67,23 @@ class DICOMReadersTest(ScriptedLoadableModuleTest):
         self.delayDisplay("Starting the DICOM test")
 
         referenceData = [
-            {"url": TESTING_DATA_URL + "SHA256/3450ef9372a3460a2f181c8d3bb35a74b4f0acb10c6e18cfcf7804e1d99bf843",
-             "checksum": "SHA256:3450ef9372a3460a2f181c8d3bb35a74b4f0acb10c6e18cfcf7804e1d99bf843",
-             "fileName": "Mouse-MR-example-where-GDCM_fails.zip",
-             "name": "Mouse-MR-example-where-GDCM_fails",
-             "seriesUID": "1.3.6.1.4.1.9590.100.1.2.366426457713813178933224342280246227461",
-             # GDCM rejects loading.
-             # DCMTK reads it but then ITK rejects loading the image with 0 spacing.
-             "expectedFailures": ["GDCM", "Archetype", "DCMTK", "GDCM with DCMTK fallback"],
-             "voxelValueQuantity": '(110852, DCM, "MR signal intensity")',
-             "voxelValueUnits": '(1, UCUM, "no units")',
-             },
-            {"url": TESTING_DATA_URL + "SHA256/899f3f8617ca53bad7dca0b2908478319e708b48ff41dfa64b6bac1d76529928",
+            {
+                "url": f"{TESTING_DATA_URL}SHA256/3450ef9372a3460a2f181c8d3bb35a74b4f0acb10c6e18cfcf7804e1d99bf843",
+                "checksum": "SHA256:3450ef9372a3460a2f181c8d3bb35a74b4f0acb10c6e18cfcf7804e1d99bf843",
+                "fileName": "Mouse-MR-example-where-GDCM_fails.zip",
+                "name": "Mouse-MR-example-where-GDCM_fails",
+                "seriesUID": "1.3.6.1.4.1.9590.100.1.2.366426457713813178933224342280246227461",
+                "expectedFailures": [
+                    "GDCM",
+                    "Archetype",
+                    "DCMTK",
+                    "GDCM with DCMTK fallback",
+                ],
+                "voxelValueQuantity": '(110852, DCM, "MR signal intensity")',
+                "voxelValueUnits": '(1, UCUM, "no units")',
+            },
+            {
+                "url": f"{TESTING_DATA_URL}SHA256/899f3f8617ca53bad7dca0b2908478319e708b48ff41dfa64b6bac1d76529928",
                 "checksum": "SHA256:899f3f8617ca53bad7dca0b2908478319e708b48ff41dfa64b6bac1d76529928",
                 "fileName": "deidentifiedMRHead-dcm-one-series.zip",
                 "name": "deidentifiedMRHead-dcm-one-series",
@@ -86,7 +91,7 @@ class DICOMReadersTest(ScriptedLoadableModuleTest):
                 "expectedFailures": [],
                 "voxelValueQuantity": '(110852, DCM, "MR signal intensity")',
                 "voxelValueUnits": '(1, UCUM, "no units")',
-             },
+            },
         ]
 
         # another dataset that could be added in the future - currently fails for all readers
@@ -148,13 +153,17 @@ class DICOMReadersTest(ScriptedLoadableModuleTest):
                 basename = loadable.name
                 volumesByApproach = {}
                 for readerApproach in readerApproaches:
-                    self.delayDisplay("Loading Selection with approach: %s" % readerApproach)
-                    loadable.name = basename + "-" + readerApproach
+                    self.delayDisplay(f"Loading Selection with approach: {readerApproach}")
+                    loadable.name = f"{basename}-{readerApproach}"
                     volumeNode = scalarVolumePlugin.load(loadable, readerApproach)
                     if not volumeNode and readerApproach not in dataset["expectedFailures"]:
-                        raise Exception("Expected to be able to read with %s, but couldn't" % readerApproach)
+                        raise Exception(
+                            f"Expected to be able to read with {readerApproach}, but couldn't"
+                        )
                     if volumeNode and readerApproach in dataset["expectedFailures"]:
-                        raise Exception("Expected to NOT be able to read with %s, but could!" % readerApproach)
+                        raise Exception(
+                            f"Expected to NOT be able to read with {readerApproach}, but could!"
+                        )
                     if volumeNode:
                         volumesByApproach[readerApproach] = volumeNode
 
@@ -170,7 +179,7 @@ class DICOMReadersTest(ScriptedLoadableModuleTest):
                 #
                 failedComparisons = {}
                 approachesThatLoaded = list(volumesByApproach.keys())
-                print("approachesThatLoaded %s" % approachesThatLoaded)
+                print(f"approachesThatLoaded {approachesThatLoaded}")
                 for approachIndex in range(len(approachesThatLoaded)):
                     firstApproach = approachesThatLoaded[approachIndex]
                     firstVolume = volumesByApproach[firstApproach]
@@ -184,9 +193,9 @@ class DICOMReadersTest(ScriptedLoadableModuleTest):
                             failedComparisons[firstApproach, secondApproach] = comparison
 
                 if len(failedComparisons.keys()) > 0:
-                    raise Exception("Loaded volumes don't match: %s" % failedComparisons)
+                    raise Exception(f"Loaded volumes don't match: {failedComparisons}")
 
-                self.delayDisplay("%s Test passed!" % dataset["name"])
+                self.delayDisplay(f'{dataset["name"]} Test passed!')
 
             except Exception as e:
                 import traceback
@@ -222,8 +231,9 @@ class DICOMReadersTest(ScriptedLoadableModuleTest):
 
         dicomFilesDirectory = SampleData.downloadFromURL(
             fileNames="deidentifiedMRHead-dcm-one-series.zip",
-            uris=TESTING_DATA_URL + "SHA256/899f3f8617ca53bad7dca0b2908478319e708b48ff41dfa64b6bac1d76529928",
-            checksums="SHA256:899f3f8617ca53bad7dca0b2908478319e708b48ff41dfa64b6bac1d76529928")[0]
+            uris=f"{TESTING_DATA_URL}SHA256/899f3f8617ca53bad7dca0b2908478319e708b48ff41dfa64b6bac1d76529928",
+            checksums="SHA256:899f3f8617ca53bad7dca0b2908478319e708b48ff41dfa64b6bac1d76529928",
+        )[0]
         self.delayDisplay("Finished with download\n")
 
         seriesUID = "1.3.6.1.4.1.5962.99.1.3814087073.479799962.1489872804257.270.0"

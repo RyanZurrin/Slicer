@@ -62,10 +62,7 @@ def parse_nhdr(path):
 # ================================================================================
 def normalize(vec):
     norm = np.linalg.norm(vec)
-    if norm == 0.0:
-        return vec
-    else:
-        return vec * 1 / norm
+    return vec if norm == 0.0 else vec * 1 / norm
 
 
 def test_nrrd_dwi_load(first_file, second_file=None):

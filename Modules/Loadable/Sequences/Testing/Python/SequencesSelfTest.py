@@ -73,8 +73,8 @@ class SequencesSelfTestTest(ScriptedLoadableModuleTest):
     # ------------------------------------------------------------------------------
     def section_SetupPathsAndNames(self):
         # Set constants
-        self.sequencesSelfTestDir = slicer.app.temporaryPath + "/SequencesSelfTest"
-        print("Test directory: " + self.sequencesSelfTestDir)
+        self.sequencesSelfTestDir = f"{slicer.app.temporaryPath}/SequencesSelfTest"
+        print(f"Test directory: {self.sequencesSelfTestDir}")
         if not os.access(self.sequencesSelfTestDir, os.F_OK):
             os.mkdir(self.sequencesSelfTestDir)
         self.assertTrue(os.access(self.sequencesSelfTestDir, os.F_OK))

@@ -83,9 +83,9 @@ class SubjectHierarchyFoldersTest1(unittest.TestCase):
 
         sceneFile = SampleData.downloadFromURL(
             fileNames="NACBrainAtlas2015.mrb",
-            # Note: this data set is from SlicerDataStore (not from SlicerTestingData) repository
-            uris=DATA_STORE_URL + "SHA256/d69d0331d4fd2574be1459b7734921f64f5872d3cb9589ec01b2f53dadc7112f",
-            checksums="SHA256:d69d0331d4fd2574be1459b7734921f64f5872d3cb9589ec01b2f53dadc7112f")[0]
+            uris=f"{DATA_STORE_URL}SHA256/d69d0331d4fd2574be1459b7734921f64f5872d3cb9589ec01b2f53dadc7112f",
+            checksums="SHA256:d69d0331d4fd2574be1459b7734921f64f5872d3cb9589ec01b2f53dadc7112f",
+        )[0]
 
         ioManager = slicer.app.ioManager()
         ioManager.loadFile(sceneFile)
@@ -138,7 +138,7 @@ class SubjectHierarchyFoldersTest1(unittest.TestCase):
         # Hide branch using the folder plugin
         self.startTiming()
         self.folderPlugin.setDisplayVisibility(brainFolderItem, 0)
-        logging.info("Time of hiding whole brain: " + str(self.stopTiming() / 1000) + " s")
+        logging.info(f"Time of hiding whole brain: {str(self.stopTiming() / 1000)} s")
 
         # Check if a folder display node was indeed created when changing display property on the folder
         self.assertEqual(1, slicer.mrmlScene.GetNumberOfNodesByClass("vtkMRMLFolderDisplayNode"))
@@ -161,7 +161,7 @@ class SubjectHierarchyFoldersTest1(unittest.TestCase):
         # Show folder again
         self.startTiming()
         self.folderPlugin.setDisplayVisibility(brainFolderItem, 1)
-        logging.info("Time of showing whole brain: " + str(self.stopTiming() / 1000) + " s")
+        logging.info(f"Time of showing whole brain: {str(self.stopTiming() / 1000)} s")
 
         # Check number of visible models
         numberOfVisibleModels = 0
@@ -189,7 +189,9 @@ class SubjectHierarchyFoldersTest1(unittest.TestCase):
         overrideColorQt = qt.QColor(self.overrideColor[0], self.overrideColor[1], self.overrideColor[2])
         self.startTiming()
         self.folderPlugin.setDisplayColor(midbrainFolderItem, overrideColorQt, {})
-        logging.info("Time of setting override color on midbrain branch: " + str(self.stopTiming() / 1000) + " s")
+        logging.info(
+            f"Time of setting override color on midbrain branch: {str(self.stopTiming() / 1000)} s"
+        )
 
         # Check number of models with overridden color
         numberOfOverriddenMidbrainModels = 0
@@ -198,8 +200,9 @@ class SubjectHierarchyFoldersTest1(unittest.TestCase):
         self.shNode.GetItemChildren(midbrainFolderItem, midbrainModelItems, True)
         for index in range(midbrainModelItems.GetNumberOfIds()):
             currentMidbrainModelItem = midbrainModelItems.GetId(index)
-            currentMidbrainModelNode = self.shNode.GetItemDataNode(currentMidbrainModelItem)
-            if currentMidbrainModelNode:  # The child item can be a folder as well, in which case there is no model node
+            if currentMidbrainModelNode := self.shNode.GetItemDataNode(
+                currentMidbrainModelItem
+            ):
                 displayNode = currentMidbrainModelNode.GetDisplayNode()
                 actor = self.modelDisplayableManager.GetActorByID(displayNode.GetID())
                 currentColor = actor.GetProperty().GetColor()
@@ -249,13 +252,11 @@ class SubjectHierarchyFoldersTest1(unittest.TestCase):
         testModelActor = self.modelDisplayableManager.GetActorByID(testModelDisplayNode.GetID())
 
         testModelCurrentColor = testModelActor.GetProperty().GetColor()
-        colorOverridden = False
-        if (
+        colorOverridden = (
             testModelCurrentColor[0] == self.overrideColor[0] / 255
             and testModelCurrentColor[1] == self.overrideColor[1] / 255
             and testModelCurrentColor[2] == self.overrideColor[2] / 255
-        ):
-            colorOverridden = True
+        )
         self.assertFalse(colorOverridden)
 
         testModelCurrentOpacity = testModelActor.GetProperty().GetOpacity()

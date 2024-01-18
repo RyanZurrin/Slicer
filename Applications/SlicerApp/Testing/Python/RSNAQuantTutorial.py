@@ -223,11 +223,12 @@ class RSNAQuantTutorialTest(ScriptedLoadableModuleTest):
 
         extractPath = SampleData.downloadFromURL(
             fileNames="dataset3_PETCT.zip",
-            uris=TESTING_DATA_URL + "SHA256/11e81af3462076f4ca371b632e03ed435240042915c2daf07f80059b3f78f88d",
-            checksums="SHA256:11e81af3462076f4ca371b632e03ed435240042915c2daf07f80059b3f78f88d")[0]
+            uris=f"{TESTING_DATA_URL}SHA256/11e81af3462076f4ca371b632e03ed435240042915c2daf07f80059b3f78f88d",
+            checksums="SHA256:11e81af3462076f4ca371b632e03ed435240042915c2daf07f80059b3f78f88d",
+        )[0]
 
         self.delayDisplay("Loading PET_CT_pre-treatment.mrb")
-        preTreatmentPath = extractPath + "/PET_CT_pre-treatment.mrb"
+        preTreatmentPath = f"{extractPath}/PET_CT_pre-treatment.mrb"
         slicer.util.loadScene(preTreatmentPath)
         self.takeScreenshot("PETCT-LoadedPre", "Loaded pre-treatement scene", -1)
 
@@ -273,7 +274,7 @@ class RSNAQuantTutorialTest(ScriptedLoadableModuleTest):
             slicer.util.selectModule("PETStandardUptakeValueComputation")
 
             parameters = {
-                "PETDICOMPath": extractPath + "/" + "PET1",
+                "PETDICOMPath": f"{extractPath}/PET1",
                 "PETVolume": slicer.util.getNode("PET1"),
                 "VOIVolume": slicer.util.getNode("PET1-label"),
             }
@@ -286,7 +287,7 @@ class RSNAQuantTutorialTest(ScriptedLoadableModuleTest):
             slicer.mrmlScene.Clear(0)
 
             self.delayDisplay("Loading PET_CT_post-treatment.mrb")
-            postTreatmentPath = extractPath + "/PET_CT_post-treatment.mrb"
+            postTreatmentPath = f"{extractPath}/PET_CT_post-treatment.mrb"
             slicer.util.loadScene(postTreatmentPath)
             self.takeScreenshot("PETCT-LoadedPost", "Loaded post-treatement scene", -1)
 
@@ -325,8 +326,9 @@ class RSNAQuantTutorialTest(ScriptedLoadableModuleTest):
         SampleData.downloadFromURL(
             fileNames="ChangeTrackerScene.mrb",
             loadFiles=True,
-            uris=TESTING_DATA_URL + "SHA256/64734cbbf8ebafe4a52f551d1510a8f6f3d0625eb5b6c1e328be117c48e2c653",
-            checksums="SHA256:64734cbbf8ebafe4a52f551d1510a8f6f3d0625eb5b6c1e328be117c48e2c653")
+            uris=f"{TESTING_DATA_URL}SHA256/64734cbbf8ebafe4a52f551d1510a8f6f3d0625eb5b6c1e328be117c48e2c653",
+            checksums="SHA256:64734cbbf8ebafe4a52f551d1510a8f6f3d0625eb5b6c1e328be117c48e2c653",
+        )
         self.takeScreenshot("ChangeTracker-Loaded", "Finished with download and loading", -1)
 
         try:

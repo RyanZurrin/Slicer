@@ -30,9 +30,7 @@ class SegmentEditorDrawEffect(AbstractScriptedSegmentEditorLabelEffect):
 
     def icon(self):
         iconPath = os.path.join(os.path.dirname(__file__), "Resources/Icons/Draw.png")
-        if os.path.exists(iconPath):
-            return qt.QIcon(iconPath)
-        return qt.QIcon()
+        return qt.QIcon(iconPath) if os.path.exists(iconPath) else qt.QIcon()
 
     def helpText(self):
         return "<html>" + _("""Draw segment outline in slice viewers<br>.
@@ -68,16 +66,11 @@ class SegmentEditorDrawEffect(AbstractScriptedSegmentEditorLabelEffect):
         if eventId == vtk.vtkCommand.LeftButtonPressEvent and not anyModifierKeyPressed:
             # Make sure the user wants to do the operation, even if the segment is not visible
             confirmedEditingAllowed = self.scriptedEffect.confirmCurrentSegmentVisible()
-            if confirmedEditingAllowed == self.scriptedEffect.NotConfirmed or confirmedEditingAllowed == self.scriptedEffect.ConfirmedWithDialog:
-                # ConfirmedWithDialog cancels the operation because the user had to move the mouse to click on the popup,
-                # which would interfere with the drawn shape. The dialog is not displayed again for the same segment.
-
-                # The event has to be aborted, because otherwise there would be a LeftButtonPressEvent without a matching
-                # LeftButtonReleaseEvent (as the popup window received the release button event).
-                abortEvent = True
-
-                return abortEvent
-
+            if confirmedEditingAllowed in [
+                self.scriptedEffect.NotConfirmed,
+                self.scriptedEffect.ConfirmedWithDialog,
+            ]:
+                return True
             pipeline.actionState = "drawing"
             self.scriptedEffect.cursorOff(viewWidget)
             xy = callerInteractor.GetEventPosition()
@@ -109,15 +102,12 @@ class SegmentEditorDrawEffect(AbstractScriptedSegmentEditorLabelEffect):
                 abortEvent = True
         elif eventId == vtk.vtkCommand.KeyPressEvent:
             key = callerInteractor.GetKeySym()
-            if key == "a" or key == "Return":
+            if key in ["a", "Return"]:
                 pipeline.apply()
                 abortEvent = True
             if key == "x":
                 pipeline.deleteLastPoint()
                 abortEvent = True
-        else:
-            pass
-
         pipeline.positionActors()
         return abortEvent
 
@@ -206,14 +196,14 @@ class DrawPipeline:
                 bit = (lineStipplePattern & mask) >> i
                 value = bit
                 if value == 0:
-                    for j in range(0, lineStippleRepeat):
+                    for _ in range(0, lineStippleRepeat):
                         image.SetScalarComponentFromFloat(i_dim, 0, 0, 0, on)
                         image.SetScalarComponentFromFloat(i_dim, 0, 0, 1, on)
                         image.SetScalarComponentFromFloat(i_dim, 0, 0, 2, on)
                         image.SetScalarComponentFromFloat(i_dim, 0, 0, 3, off)
                         i_dim += 1
                 else:
-                    for j in range(0, lineStippleRepeat):
+                    for _ in range(0, lineStippleRepeat):
                         image.SetScalarComponentFromFloat(i_dim, 0, 0, 0, on)
                         image.SetScalarComponentFromFloat(i_dim, 0, 0, 1, on)
                         image.SetScalarComponentFromFloat(i_dim, 0, 0, 2, on)

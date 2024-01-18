@@ -26,7 +26,7 @@ colorNode.NamesInitialisedOn()
 
 slicer.mrmlScene.AddNode(colorNode)
 
-filePath = slicer.app.temporaryPath + "/customColorTableSceneViewRestore.ctbl"
+filePath = f"{slicer.app.temporaryPath}/customColorTableSceneViewRestore.ctbl"
 colorStorageNode = slicer.vtkMRMLColorTableStorageNode()
 colorStorageNode.SetFileName(filePath)
 slicer.mrmlScene.AddNode(colorStorageNode)
@@ -45,7 +45,7 @@ colorNode.SetColor(2, mainSceneCol2[0], mainSceneCol2[1], mainSceneCol2[2], main
 colorNode.GetColor(2, mainSceneCol2)
 print("After saving the scene view, set the main scene color 2 to\n\t", mainSceneCol2)
 
-url = slicer.app.temporaryPath + "/customColorTableSceneViewRestore.mrml"
+url = f"{slicer.app.temporaryPath}/customColorTableSceneViewRestore.mrml"
 slicer.mrmlScene.SetURL(url)
 slicer.mrmlScene.Commit()
 print("Saved to ", url)
@@ -82,7 +82,9 @@ if colorNodeAfterRestore is None:
 numColors = colorNodeAfterRestore.GetNumberOfColors()
 
 if numColors != 3:
-    exceptionMessage = "Color node doesn't have 3 colors, instead has " + str(numColors)
+    exceptionMessage = (
+        f"Color node doesn't have 3 colors, instead has {str(numColors)}"
+    )
     raise Exception(exceptionMessage)
 
 afterRestoreSceneCol2 = [0.0, 0.0, 0.0, 0.0]
@@ -104,5 +106,5 @@ diffTotal = math.fabs(rdiff) + math.fabs(gdiff) + math.fabs(bdiff) + math.fabs(a
 print("Difference between colors after restored the scene and value from when it was read in from disk:\n\t", rdiff, gdiff, bdiff, adiff, "\n\tsummed absolute diff = ", diffTotal)
 
 if diffTotal > 0.1:
-    exceptionMessage = "Difference between color values total = " + str(diffTotal)
+    exceptionMessage = f"Difference between color values total = {str(diffTotal)}"
     raise Exception(exceptionMessage)

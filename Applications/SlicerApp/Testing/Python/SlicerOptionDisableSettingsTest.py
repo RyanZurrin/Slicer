@@ -47,8 +47,12 @@ def checkUserSettings(slicer_executable, common_args, keep_temporary_settings=Fa
         args.append("--keep-temporary-settings")
         condition = '!= "bar"'
         error = "Setting foo should be set to bar"
-    args.extend(["--python-code",
-                 'if slicer.app.userSettings().value("foo") ' + condition + ': raise Exception("' + error + '.")'])
+    args.extend(
+        [
+            "--python-code",
+            f'if slicer.app.userSettings().value("foo") {condition}: raise Exception("{error}.")',
+        ]
+    )
     assert runSlicerAndExit(slicer_executable, args)[0] == EXIT_SUCCESS
     print("=> ok\n")
 
@@ -71,8 +75,12 @@ def checkRevisionUserSettings(slicer_executable, common_args, keep_temporary_set
         args.append("--keep-temporary-settings")
         condition = '!= "bar"'
         error = "Setting foo should be set to bar"
-    args.extend(["--python-code",
-                 'if slicer.app.revisionUserSettings().value("foo") ' + condition + ': raise Exception("' + error + '.")'])
+    args.extend(
+        [
+            "--python-code",
+            f'if slicer.app.revisionUserSettings().value("foo") {condition}: raise Exception("{error}.")',
+        ]
+    )
     assert runSlicerAndExit(slicer_executable, args)[0] == EXIT_SUCCESS
     print("=> ok\n")
 
@@ -92,7 +100,7 @@ def checkKeepTemporarySettingsWithoutDisableSettingsDisplayWarning(slicer_execut
 
 if __name__ == "__main__":
     if len(sys.argv) != 2:
-        print(os.path.basename(sys.argv[0]) + " /path/to/Slicer")
+        print(f"{os.path.basename(sys.argv[0])} /path/to/Slicer")
         exit(EXIT_FAILURE)
 
     slicer_executable = os.path.expanduser(sys.argv[1])

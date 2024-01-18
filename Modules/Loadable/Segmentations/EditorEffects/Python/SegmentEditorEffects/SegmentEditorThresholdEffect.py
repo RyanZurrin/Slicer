@@ -72,9 +72,7 @@ class SegmentEditorThresholdEffect(AbstractScriptedSegmentEditorEffect):
 
     def icon(self):
         iconPath = os.path.join(os.path.dirname(__file__), "Resources/Icons/Threshold.png")
-        if os.path.exists(iconPath):
-            return qt.QIcon(iconPath)
-        return qt.QIcon()
+        return qt.QIcon(iconPath) if os.path.exists(iconPath) else qt.QIcon()
 
     def helpText(self):
         return "<html>" + _("""Fill segment based on source volume intensity range<br>. Options:<p>
@@ -387,7 +385,7 @@ class SegmentEditorThresholdEffect(AbstractScriptedSegmentEditorEffect):
         self.scriptedEffect.addOptionsWidget(self.useForPaintButton)
 
         self.applyButton = qt.QPushButton(_("Apply"))
-        self.applyButton.objectName = self.__class__.__name__ + "Apply"
+        self.applyButton.objectName = f"{self.__class__.__name__}Apply"
         self.applyButton.setToolTip(_("Fill selected segment in regions that are in the specified intensity range."))
         self.scriptedEffect.addOptionsWidget(self.applyButton)
 
@@ -401,9 +399,7 @@ class SegmentEditorThresholdEffect(AbstractScriptedSegmentEditorEffect):
         self.applyButton.connect("clicked()", self.onApply)
 
     def sourceVolumeNodeChanged(self):
-        # Set scalar range of source volume image data to threshold slider
-        masterImageData = self.scriptedEffect.sourceVolumeImageData()
-        if masterImageData:
+        if masterImageData := self.scriptedEffect.sourceVolumeImageData():
             lo, hi = masterImageData.GetScalarRange()
             self.thresholdSlider.setRange(lo, hi)
             self.thresholdSlider.singleStep = (hi - lo) / 1000.
@@ -622,8 +618,6 @@ class SegmentEditorThresholdEffect(AbstractScriptedSegmentEditorEffect):
             modifierLabelmap.DeepCopy(thresh.GetOutput())
         except IndexError:
             logging.error("apply: Failed to threshold source volume!")
-            pass
-
         # Apply changes
         self.scriptedEffect.modifySelectedSegmentByLabelmap(modifierLabelmap, slicer.qSlicerSegmentEditorAbstractEffect.ModificationModeSet)
 
@@ -800,10 +794,7 @@ class SegmentEditorThresholdEffect(AbstractScriptedSegmentEditorEffect):
             compositeNode = sliceLogic.GetSliceCompositeNode()
             foregroundOpacity = compositeNode.GetForegroundOpacity()
 
-        if foregroundOpacity > 0.5:
-            return foregroundLogic
-
-        return backgroundLogic
+        return foregroundLogic if foregroundOpacity > 0.5 else backgroundLogic
 
     def updateHistogram(self):
         masterImageData = self.scriptedEffect.sourceVolumeImageData()
@@ -837,12 +828,11 @@ class SegmentEditorThresholdEffect(AbstractScriptedSegmentEditorEffect):
         masterImageData = self.scriptedEffect.sourceVolumeImageData()
         scalarRange = masterImageData.GetScalarRange()
         scalarType = masterImageData.GetScalarType()
-        if scalarType == vtk.VTK_FLOAT or scalarType == vtk.VTK_DOUBLE:
+        if scalarType in [vtk.VTK_FLOAT, vtk.VTK_DOUBLE]:
             numberOfBins = maxNumberOfBins
         else:
             numberOfBins = int(scalarRange[1] - scalarRange[0]) + 1
-        if numberOfBins > maxNumberOfBins:
-            numberOfBins = maxNumberOfBins
+        numberOfBins = min(numberOfBins, maxNumberOfBins)
         binSpacing = (scalarRange[1] - scalarRange[0] + 1) / numberOfBins
 
         self.imageAccumulate.SetComponentExtent(0, numberOfBins - 1, 0, 0, 0, 0)
@@ -985,11 +975,11 @@ class HistogramEventFilter(qt.QObject):
         if self.thresholdEffect is None:
             return
 
-        if (
-            event.type() == qt.QEvent.GraphicsSceneMousePress
-            or event.type() == qt.QEvent.GraphicsSceneMouseMove
-            or event.type() == qt.QEvent.GraphicsSceneMouseRelease
-        ):
+        if event.type() in [
+            qt.QEvent.GraphicsSceneMousePress,
+            qt.QEvent.GraphicsSceneMouseMove,
+            qt.QEvent.GraphicsSceneMouseRelease,
+        ]:
             transferFunction = object.transferFunction()
             if transferFunction is None:
                 return

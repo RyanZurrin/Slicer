@@ -34,9 +34,7 @@ class SegmentEditorLevelTracingEffect(AbstractScriptedSegmentEditorLabelEffect):
 
     def icon(self):
         iconPath = os.path.join(os.path.dirname(__file__), "Resources/Icons/LevelTracing.png")
-        if os.path.exists(iconPath):
-            return qt.QIcon(iconPath)
-        return qt.QIcon()
+        return qt.QIcon(iconPath) if os.path.exists(iconPath) else qt.QIcon()
 
     def helpText(self):
         return "<html>" + _("""Add uniform intensity region to selected segment<br>.
@@ -185,11 +183,12 @@ class LevelTracingPipeline:
         # Get source volume image data
         sourceImageData = self.effect.scriptedEffect.sourceVolumeImageData()
 
-        segmentationNode = self.effect.scriptedEffect.parameterSetNode().GetSegmentationNode()
-        parentTransformNode = None
-        if segmentationNode:
+        if (
+            segmentationNode := self.effect.scriptedEffect.parameterSetNode().GetSegmentationNode()
+        ):
             parentTransformNode = segmentationNode.GetParentTransformNode()
-
+        else:
+            parentTransformNode = None
         self.xyPoints.Reset()
         ijk = self.effect.xyToIjk(xy, self.sliceWidget, sourceImageData, parentTransformNode)
         dimensions = sourceImageData.GetDimensions()

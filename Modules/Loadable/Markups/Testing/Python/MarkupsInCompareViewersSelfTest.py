@@ -163,7 +163,7 @@ class MarkupsInCompareViewersSelfTestLogic(ScriptedLoadableModuleLogic):
             compareLogic1.StartSliceOffsetInteraction()
             compareLogic1.SetSliceOffset(offset)
             compareLogic1.EndSliceOffsetInteraction()
-            msg = "Scrolled to " + str(offset)
+            msg = f"Scrolled to {str(offset)}"
             slicer.util.delayDisplay(msg, 250)
             offset += 1.0
 

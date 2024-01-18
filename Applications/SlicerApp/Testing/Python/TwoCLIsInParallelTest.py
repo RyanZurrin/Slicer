@@ -85,10 +85,10 @@ class TwoCLIsInParallelTestLogic(ScriptedLoadableModuleLogic):
         self.Observations.append([object, event, method, group, tag])
 
     def hasObserver(self, object, event, method):
-        for o, e, m, g, t in self.Observations:
-            if o == object and e == event and m == method:
-                return True
-        return False
+        return any(
+            o == object and e == event and m == method
+            for o, e, m, g, t in self.Observations
+        )
 
     def removeObservers(self, object, event, method):
         for o, e, m, g, t in self.Observations:
@@ -119,12 +119,12 @@ class TwoCLIsInParallelTestTest(ScriptedLoadableModuleTest):
         self.assertTrue(tempFile.open())
 
         logic = TwoCLIsInParallelTestLogic()
-        logic.parameters = {}
-        logic.parameters["InputValue1"] = 1
-        logic.parameters["InputValue2"] = 2
-        logic.parameters["OperationType"] = "Addition"
-        logic.parameters["OutputFile"] = tempFile.fileName()
-
+        logic.parameters = {
+            "InputValue1": 1,
+            "InputValue2": 2,
+            "OperationType": "Addition",
+            "OutputFile": tempFile.fileName(),
+        }
         logic.runModule1()
         self.delayDisplay("... Waiting to start module 2 ...")
         logic.runModule2()

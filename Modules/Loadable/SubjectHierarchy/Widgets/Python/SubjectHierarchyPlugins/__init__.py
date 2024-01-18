@@ -1,5 +1,6 @@
 """This package contains plugins for Subject Hierarchy implemented in Python."""
 
+
 import os
 import traceback
 import logging
@@ -17,4 +18,6 @@ for fileName in os.listdir(currentDir):
         try:
             exec(importStr)
         except Exception as e:
-            logging.error("Failed to import " + fileNameNoExtension + ": " + traceback.format_exc())
+            logging.error(
+                f"Failed to import {fileNameNoExtension}: {traceback.format_exc()}"
+            )

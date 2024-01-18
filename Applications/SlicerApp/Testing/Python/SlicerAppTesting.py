@@ -45,7 +45,7 @@ def dropcache():
         run("/usr/bin/sudo", ["sysctl", "vm.drop_caches=1"], drop_cache=False)
     else:
         # XXX Implement other platform (Windows: EmptyStandbyList ?, macOS: Purge ?)
-        raise Exception("--drop-cache is not supported on %s" % sys.platform)
+        raise Exception(f"--drop-cache is not supported on {sys.platform}")
 
 
 def run(executable, arguments=[], verbose=True, shell=False, drop_cache=False):
@@ -53,7 +53,9 @@ def run(executable, arguments=[], verbose=True, shell=False, drop_cache=False):
     if drop_cache:
         dropcache()
     if verbose:
-        print("{} {}".format(os.path.basename(executable), " ".join([pipes.quote(arg) for arg in arguments])))
+        print(
+            f'{os.path.basename(executable)} {" ".join([pipes.quote(arg) for arg in arguments])}'
+        )
     arguments.insert(0, executable)
     if shell:
         arguments = " ".join([pipes.quote(arg) for arg in arguments])
@@ -62,7 +64,7 @@ def run(executable, arguments=[], verbose=True, shell=False, drop_cache=False):
     stdout, stderr = p.communicate()
 
     if p.returncode != EXIT_SUCCESS:
-        print("STDERR: " + stderr.decode(), file=sys.stderr)
+        print(f"STDERR: {stderr.decode()}", file=sys.stderr)
 
     return (p.returncode, stdout.decode(), stderr.decode())
 

@@ -102,12 +102,15 @@ exclude_patterns = ["_build", "Thumbs.db", ".DS_Store", "_moduledescriptions"]
 # It is useful for quicker documentation generation while eiditing user manual.
 if os.environ.get("EXCLUDE_API_REFERENCE", False) == "True":
     print("API reference is excluded from documentation.")
-    exclude_patterns.append("developer_guide/vtkTeem.rst")
-    exclude_patterns.append("developer_guide/vtkAddon.rst")
-    exclude_patterns.append("developer_guide/vtkITK.rst")
-    exclude_patterns.append("developer_guide/slicer.rst")
-    exclude_patterns.append("developer_guide/mrml.rst")
-
+    exclude_patterns.extend(
+        (
+            "developer_guide/vtkTeem.rst",
+            "developer_guide/vtkAddon.rst",
+            "developer_guide/vtkITK.rst",
+            "developer_guide/slicer.rst",
+            "developer_guide/mrml.rst",
+        )
+    )
 # sphinx-notfound-page
 # https://github.com/readthedocs/sphinx-notfound-page
 notfound_context = {

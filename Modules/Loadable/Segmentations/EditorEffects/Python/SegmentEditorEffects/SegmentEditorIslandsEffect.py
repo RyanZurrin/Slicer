@@ -29,9 +29,7 @@ class SegmentEditorIslandsEffect(AbstractScriptedSegmentEditorEffect):
 
     def icon(self):
         iconPath = os.path.join(os.path.dirname(__file__), "Resources/Icons/Islands.png")
-        if os.path.exists(iconPath):
-            return qt.QIcon(iconPath)
-        return qt.QIcon()
+        return qt.QIcon(iconPath) if os.path.exists(iconPath) else qt.QIcon()
 
     def helpText(self):
         return "<html>" + _("""Edit islands (connected components) in a segment<br>. To get more information
@@ -97,7 +95,7 @@ about each operation, hover the mouse over the option and wait for the tooltip t
         self.minimumSizeLabel = self.scriptedEffect.addLabeledOptionsWidget(_("Minimum size:"), self.minimumSizeSpinBox)
 
         self.applyButton = qt.QPushButton(_("Apply"))
-        self.applyButton.objectName = self.__class__.__name__ + "Apply"
+        self.applyButton.objectName = f"{self.__class__.__name__}Apply"
         self.scriptedEffect.addOptionsWidget(self.applyButton)
 
         for operationRadioButton in self.operationRadioButtons:
@@ -205,7 +203,7 @@ about each operation, hover the mouse over the option and wait for the tooltip t
                 segmentID = selectedSegmentID
                 if i != 0 and split:
                     segment = slicer.vtkSegment()
-                    name = baseSegmentName + "_" + str(i + 1)
+                    name = f"{baseSegmentName}_{str(i + 1)}"
                     segment.SetName(name)
                     segment.AddRepresentation(
                         slicer.vtkSegmentationConverter.GetSegmentationBinaryLabelmapRepresentationName(),
@@ -272,19 +270,11 @@ about each operation, hover the mouse over the option and wait for the tooltip t
 
         # Make sure the user wants to do the operation, even if the segment is not visible
         confirmedEditingAllowed = self.scriptedEffect.confirmCurrentSegmentVisible()
-        if (
-            confirmedEditingAllowed == self.scriptedEffect.NotConfirmed
-            or confirmedEditingAllowed == self.scriptedEffect.ConfirmedWithDialog
-        ):
-            # ConfirmedWithDialog cancels the operation because without seeing the segment, the island may have looked different
-            # than what the user remembered/expected. The dialog is not displayed again for the same segment.
-
-            # The event has to be aborted, because otherwise there would be a LeftButtonPressEvent without a matching
-            # LeftButtonReleaseEvent (as the popup window received the release button event).
-            abortEvent = True
-
-            return abortEvent
-
+        if confirmedEditingAllowed in [
+            self.scriptedEffect.NotConfirmed,
+            self.scriptedEffect.ConfirmedWithDialog,
+        ]:
+            return True
         abortEvent = True
 
         # Generate merged labelmap of all visible segments
@@ -354,13 +344,8 @@ about each operation, hover the mouse over the option and wait for the tooltip t
                 self.scriptedEffect.modifySelectedSegmentByLabelmap(modifierLabelmap, slicer.qSlicerSegmentEditorAbstractEffect.ModificationModeAdd)
 
             elif pixelValue != 0:  # if clicked on empty part then there is nothing to remove or keep
-                if operationName == KEEP_SELECTED_ISLAND:
-                    floodFillingFilter.SetInValue(1)
-                    floodFillingFilter.SetOutValue(0)
-                else:  # operationName == REMOVE_SELECTED_ISLAND:
-                    floodFillingFilter.SetInValue(1)
-                    floodFillingFilter.SetOutValue(0)
-
+                floodFillingFilter.SetInValue(1)
+                floodFillingFilter.SetOutValue(0)
                 floodFillingFilter.Update()
                 modifierLabelmap = self.scriptedEffect.defaultModifierLabelmap()
                 modifierLabelmap.DeepCopy(floodFillingFilter.GetOutput())

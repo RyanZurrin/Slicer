@@ -83,8 +83,10 @@ if __name__ == "__main__":
     EMTSerializer.SlicerExecutable = slicer_executable
     CLIName = "ExecutionModelTour"
     required_inputs = [
-        "--transform1", "%s/ExecutionModelTourTestPython.mrml#vtkMRMLLinearTransformNode1" % (temp_dir),
-        "--transform2", "%s/ExecutionModelTourTestPython.mrml#vtkMRMLLinearTransformNode2" % (temp_dir),
+        "--transform1",
+        f"{temp_dir}/ExecutionModelTourTestPython.mrml#vtkMRMLLinearTransformNode1",
+        "--transform2",
+        f"{temp_dir}/ExecutionModelTourTestPython.mrml#vtkMRMLLinearTransformNode2",
         mrHeadResampled,
         ctHeadAxial,
     ]
@@ -105,25 +107,21 @@ if __name__ == "__main__":
     # Serialize the CLI
     (returncode, serializeErr, serializeOut) = EMTSerializer.serializeCLI(CLIName, json_file, parameters)
     if returncode != EXIT_SUCCESS:
-        print("Problem while serializing the CLI: %s" % serializeErr)
+        print(f"Problem while serializing the CLI: {serializeErr}")
         exit(EXIT_FAILURE)
 
     # Make sure the Json is generated correctly
     expected_json = {
-        "Parameters":
-        {
-            "Boolean Parameters":
-            {
+        "Parameters": {
+            "Boolean Parameters": {
                 "boolean1": True,
                 "boolean2": False,
                 "boolean3": False,
             },
-            "Enumeration Parameters":
-            {
+            "Enumeration Parameters": {
                 "stringChoice": "Bill",
             },
-            "File, Directory and Image Parameters":
-            {
+            "File, Directory and Image Parameters": {
                 "directory1": "",
                 "file1": "",
                 "files": ["1.does", "2.not", "3.matter"],
@@ -131,44 +129,36 @@ if __name__ == "__main__":
                 "image2": "",
                 "outputFile1": "",
             },
-            "Generic Tables":
-            {
+            "Generic Tables": {
                 "inputDT": "",
                 "outputDT": "",
             },
-            "Geometry Parameters":
-            {
+            "Geometry Parameters": {
                 "InputModel": "",
                 "ModelSceneFile": [],
                 "OutputModel": "",
             },
-            "Index Parameters":
-            {
+            "Index Parameters": {
                 "arg0": mrHeadResampled,
                 "arg1": ctHeadAxial,
             },
-            "Measurements":
-            {
+            "Measurements": {
                 "inputFA": "",
                 "outputFA": "",
             },
-            "Point Parameters":
-            {
+            "Point Parameters": {
                 "seed": [[1.0, 0.0, -1.0]],
                 "seedsFile": "",
                 "seedsOutFile": serializeSeedsOutFile,
             },
-            "Regions of interest":
-            {
+            "Regions of interest": {
                 "regions": [],
             },
-            "Scalar Parameters (\u00e1rv\u00edzt\u0171r\u0151 t\u00fck\u00f6rf\u00far\u00f3g\u00e9p)":
-            {
+            "Scalar Parameters (\u00e1rv\u00edzt\u0171r\u0151 t\u00fck\u00f6rf\u00far\u00f3g\u00e9p)": {
                 "doubleVariable": 30,
                 "integerVariable": 30,
             },
-            "Simple return types":
-            {
+            "Simple return types": {
                 "abooleanreturn": False,
                 "adoublereturn": 14,
                 "afloatreturn": 7,
@@ -177,10 +167,9 @@ if __name__ == "__main__":
                 "astringchoicereturn": "Bill",
                 "astringreturn": "Hello",
             },
-            "Transform Parameters":
-            {
-                "transform1": "%s/ExecutionModelTourTestPython.mrml#vtkMRMLLinearTransformNode1" % (temp_dir),
-                "transform2": "%s/ExecutionModelTourTestPython.mrml#vtkMRMLLinearTransformNode2" % (temp_dir),
+            "Transform Parameters": {
+                "transform1": f"{temp_dir}/ExecutionModelTourTestPython.mrml#vtkMRMLLinearTransformNode1",
+                "transform2": f"{temp_dir}/ExecutionModelTourTestPython.mrml#vtkMRMLLinearTransformNode2",
                 "transformInput": "",
                 "transformInputBspline": "",
                 "transformInputNonlinear": "",
@@ -188,24 +177,25 @@ if __name__ == "__main__":
                 "transformOutputBspline": "",
                 "transformOutputNonlinear": "",
             },
-            "Vector Parameters":
-            {
+            "Vector Parameters": {
                 "floatVector": [1.2999999523162842, 2, -14],
                 "stringVector": ["foo", "bar", "foobar"],
             },
-        },
+        }
     }
 
     with open(json_file, encoding="utf8") as file:
         data = json.load(file)
         if data != expected_json:
             print("Json comparison failed !")
-            expected_json_filename = temp_dir + "/ExecutionModelTourSerializedBaseline.json"
-            print("Expected json: " + expected_json_filename)
+            expected_json_filename = (
+                f"{temp_dir}/ExecutionModelTourSerializedBaseline.json"
+            )
+            print(f"Expected json: {expected_json_filename}")
             with open(expected_json_filename, "w", encoding="utf8") as outfile:
                 json.dump(expected_json, outfile, indent="\t", ensure_ascii=False)
-            actual_json_filename = temp_dir + "/ExecutionModelTourSerializedActual.json"
-            print("Actual json: " + actual_json_filename)
+            actual_json_filename = f"{temp_dir}/ExecutionModelTourSerializedActual.json"
+            print(f"Actual json: {actual_json_filename}")
             with open(actual_json_filename, "w", encoding="utf8") as outfile:
                 json.dump(data, outfile, indent="\t", ensure_ascii=False)
             exit(EXIT_FAILURE)
@@ -216,11 +206,11 @@ if __name__ == "__main__":
     ]
     (returncode, deserializeErr, deserializeOut) = EMTSerializer.deserializeCLI(CLIName, json_file, parameters)
     if returncode != EXIT_SUCCESS:
-        print("Problem while deserializing the CLI: %s" % deserializeErr)
+        print(f"Problem while deserializing the CLI: {deserializeErr}")
         exit(EXIT_FAILURE)
 
     # Finally compare seeds file
-    with open(serializeSeedsOutFile) as in_file, open(deserializeSeedsOutFile) as out_file:
+    with (open(serializeSeedsOutFile) as in_file, open(deserializeSeedsOutFile) as out_file):
         in_reader = csv.reader(in_file)
         out_reader = csv.reader(out_file)
 
@@ -232,9 +222,9 @@ if __name__ == "__main__":
 
         for i in range(len(serializedRows)):
             if serializedRows[i] != deserializedRows[i]:
-                print("Row #%s comparison failed:" % i)
-                print("Serialize row: %s" % serializedRows[i])
-                print("Deserialize row: %s" % deserializedRows[i])
+                print(f"Row #{i} comparison failed:")
+                print(f"Serialize row: {serializedRows[i]}")
+                print(f"Deserialize row: {deserializedRows[i]}")
                 exit(EXIT_FAILURE)
 
     try:

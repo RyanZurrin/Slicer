@@ -80,32 +80,30 @@ def removeCoordinateSystemUpdaters(curveObservations):
 # Set up tests
 #
 
-curveMeasurementsTestDir = slicer.app.temporaryPath + "/curveMeasurementsTest"
+curveMeasurementsTestDir = f"{slicer.app.temporaryPath}/curveMeasurementsTest"
 print("Test directory: ", curveMeasurementsTestDir)
 if not os.access(curveMeasurementsTestDir, os.F_OK):
     os.mkdir(curveMeasurementsTestDir)
 
 curvePointToWorldTransform = vtk.vtkMatrix4x4()
 
-curveObservations = []
-
 #
 # Test1. Test free-form curve with 6 control points, all points in one plane
 #
 
-testSceneFilePath = curveMeasurementsTestDir + "/MarkupsCurvatureTestScene.mrb"
+testSceneFilePath = f"{curveMeasurementsTestDir}/MarkupsCurvatureTestScene.mrb"
 slicer.util.downloadFile(
-    TESTING_DATA_URL + "SHA256/5b1f39e28ad8611790152fdc092ec9b3ee14254aad4897377db9576139c88e32",
+    f"{TESTING_DATA_URL}SHA256/5b1f39e28ad8611790152fdc092ec9b3ee14254aad4897377db9576139c88e32",
     testSceneFilePath,
-    checksum="SHA256:5b1f39e28ad8611790152fdc092ec9b3ee14254aad4897377db9576139c88e32")
+    checksum="SHA256:5b1f39e28ad8611790152fdc092ec9b3ee14254aad4897377db9576139c88e32",
+)
 slicer.util.loadScene(testSceneFilePath)
 planarCurveNode = slicer.util.getNode("C")
 
 # Visualize
 
 updateInfo = createCoordinateSystemsModel(planarCurveNode)
-curveObservations.append(addCoordinateSystemUpdater(updateInfo))
-
+curveObservations = [addCoordinateSystemUpdater(updateInfo)]
 # Check quantitative results
 
 if not planarCurveNode.GetCurvePointToWorldTransformAtPointIndex(6, curvePointToWorldTransform):
@@ -158,12 +156,13 @@ if not np.isclose(curvePointToWorldMatrix, expectedCurvePointToWorldMatrix).all(
 # of a model using the ExtractCenterline module in the SlicerVMTK extension.
 #
 
-testSceneFilePath = curveMeasurementsTestDir + "/MarkupsControlPointMeasurementInterpolationTestScene.mrb"
+testSceneFilePath = f"{curveMeasurementsTestDir}/MarkupsControlPointMeasurementInterpolationTestScene.mrb"
 
 slicer.util.downloadFile(
-    TESTING_DATA_URL + "SHA256/b636ecfc1be54504c2c9843e1ff53242ee6b951228490ae99a89e06c8890e344",
+    f"{TESTING_DATA_URL}SHA256/b636ecfc1be54504c2c9843e1ff53242ee6b951228490ae99a89e06c8890e344",
     testSceneFilePath,
-    checksum="SHA256:b636ecfc1be54504c2c9843e1ff53242ee6b951228490ae99a89e06c8890e344")
+    checksum="SHA256:b636ecfc1be54504c2c9843e1ff53242ee6b951228490ae99a89e06c8890e344",
+)
 
 # Import test scene
 slicer.util.loadScene(testSceneFilePath)

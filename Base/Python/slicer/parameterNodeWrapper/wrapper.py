@@ -146,17 +146,16 @@ def _initMethod(self, parameterNode, prefix: Optional[str] = None):
 def _checkParamName(paramNodeWrapInstanceOrClass, paramName: str):
     topname, subname = splitPossiblyDottedName(paramName)
 
-    if topname in paramNodeWrapInstanceOrClass.allParameters:
-        if subname is None:
-            return
-        else:
-            checkPackMember(unannotatedType(paramNodeWrapInstanceOrClass.allParameters[topname].unalteredType),
-                            subname)
-    else:
+    if topname not in paramNodeWrapInstanceOrClass.allParameters:
         raise ValueError(f"Cannot find a param with the given name: {topname}"
                          + "\n  Found parameters ["
                          + "".join([f"\n    {name}," for name in paramNodeWrapInstanceOrClass.allParameters.keys()])
                          + "\n  ]")
+    if subname is None:
+        return
+    else:
+        checkPackMember(unannotatedType(paramNodeWrapInstanceOrClass.allParameters[topname].unalteredType),
+                        subname)
 
 
 def _isCached(self, paramName: str):
@@ -221,8 +220,7 @@ def findChildWidgetForParameter(widget, parameter):
 
     # see if it is in a parameterPack
     topname, subname = splitPossiblyDottedName(parameter)
-    w = findChildWidgetForParameter(widget, topname)
-    if w:
+    if w := findChildWidgetForParameter(widget, topname):
         packNameToWidgetMap = _getPackNameToWidgetMap(w)
         if subname in packNameToWidgetMap:
             return packNameToWidgetMap[subname]
@@ -264,10 +262,7 @@ def _getValue(self, name):
     _checkParamName(self, name)
     topname, subname = splitPossiblyDottedName(name)
     topnameValue = getattr(self, f"_{topname}_impl").read()
-    if subname is None:
-        return topnameValue
-    else:
-        return topnameValue.getValue(subname)
+    return topnameValue if subname is None else topnameValue.getValue(subname)
 
 
 def _setValue(self, name, value):
@@ -275,9 +270,8 @@ def _setValue(self, name, value):
     topname, subname = splitPossiblyDottedName(name)
     if subname is None:
         return getattr(self, f"_{topname}_impl").write(value)
-    else:
-        topnameValue = getattr(self, f"_{topname}_impl").read()
-        topnameValue.setValue(subname, value)
+    topnameValue = getattr(self, f"_{topname}_impl").read()
+    topnameValue.setValue(subname, value)
 
 
 def _makeDataTypeFunc(classvar):
@@ -362,6 +356,4 @@ def parameterNodeWrapper(classtype=None):
         return _processClass(cls)
 
     # See if we're being called as @parameterNode or @parameterNode().
-    if classtype is None:
-        return wrap
-    return wrap(classtype)
+    return wrap if classtype is None else wrap(classtype)

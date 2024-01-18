@@ -67,7 +67,7 @@ class CLIEventTestLogic(VTKObservationMixin):
         cliNode = slicer.cli.run(cliModule, cliNode, parameters, wait_for_completion)
 
     def onCLIModified(self, cliNode, event):
-        print("-- " + cliNode.GetStatusString() + ":" + cliNode.GetName())
+        print(f"-- {cliNode.GetStatusString()}:{cliNode.GetName()}")
         self.StatusEvents.append(cliNode.GetStatus())
 
         if not cliNode.IsBusy():
@@ -111,12 +111,12 @@ class CLIEventTestTest(ScriptedLoadableModuleTest):
         self.assertTrue(tempFile.open())
 
         logic = CLIEventTestLogic()
-        parameters = {}
-        parameters["InputValue1"] = 1
-        parameters["InputValue2"] = 2
-        parameters["OperationType"] = "Addition"
-        parameters["OutputFile"] = tempFile.fileName()
-
+        parameters = {
+            "InputValue1": 1,
+            "InputValue2": 2,
+            "OperationType": "Addition",
+            "OutputFile": tempFile.fileName(),
+        }
         cliModule = slicer.modules.cli4test
         cli = slicer.cli.createNode(cliModule)
         self.assertEqual(cli.GetStatus(), cli.Idle)
@@ -153,12 +153,12 @@ class CLIEventTestTest(ScriptedLoadableModuleTest):
         self.assertTrue(tempFile.open())
 
         logic = CLIEventTestLogic()
-        parameters = {}
-        parameters["InputValue1"] = 1
-        parameters["InputValue2"] = 2
-        parameters["OperationType"] = "Fail"
-        parameters["OutputFile"] = tempFile.fileName()
-
+        parameters = {
+            "InputValue1": 1,
+            "InputValue2": 2,
+            "OperationType": "Fail",
+            "OutputFile": tempFile.fileName(),
+        }
         cliModule = slicer.modules.cli4test
         cli = slicer.cli.createNode(cliModule)
         self.assertEqual(cli.GetStatus(), cli.Idle)
@@ -189,12 +189,12 @@ class CLIEventTestTest(ScriptedLoadableModuleTest):
         self.assertTrue(tempFile.open())
 
         logic = CLIEventTestLogic()
-        parameters = {}
-        parameters["InputValue1"] = 1
-        parameters["InputValue2"] = 2
-        parameters["OperationType"] = "Addition"
-        parameters["OutputFile"] = tempFile.fileName()
-
+        parameters = {
+            "InputValue1": 1,
+            "InputValue2": 2,
+            "OperationType": "Addition",
+            "OutputFile": tempFile.fileName(),
+        }
         cliModule = slicer.modules.cli4test
         cli = slicer.cli.createNode(cliModule)
         self.assertEqual(cli.GetStatus(), cli.Idle)

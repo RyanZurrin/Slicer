@@ -28,9 +28,7 @@ class SegmentEditorSmoothingEffect(AbstractScriptedSegmentEditorPaintEffect):
 
     def icon(self):
         iconPath = os.path.join(os.path.dirname(__file__), "Resources/Icons/Smoothing.png")
-        if os.path.exists(iconPath):
-            return qt.QIcon(iconPath)
-        return qt.QIcon()
+        return qt.QIcon(iconPath) if os.path.exists(iconPath) else qt.QIcon()
 
     def helpText(self):
         return "<html>" + _("""Make segment boundaries smoother<br> by removing extrusions and filling small holes. The effect can be either applied locally
@@ -91,12 +89,14 @@ If segments overlap, segment higher in the segments table will have priority. <b
         self.applyToAllVisibleSegmentsCheckBox = qt.QCheckBox()
         self.applyToAllVisibleSegmentsCheckBox.setToolTip(
             _("Apply smoothing effect to all visible segments in this segmentation node. This operation may take a while."))
-        self.applyToAllVisibleSegmentsCheckBox.objectName = self.__class__.__name__ + "ApplyToAllVisibleSegments"
+        self.applyToAllVisibleSegmentsCheckBox.objectName = (
+            f"{self.__class__.__name__}ApplyToAllVisibleSegments"
+        )
         self.applyToAllVisibleSegmentsLabel = self.scriptedEffect.addLabeledOptionsWidget(_("Apply to visible segments:"),
                                                                                           self.applyToAllVisibleSegmentsCheckBox)
 
         self.applyButton = qt.QPushButton(_("Apply"))
-        self.applyButton.objectName = self.__class__.__name__ + "Apply"
+        self.applyButton.objectName = f"{self.__class__.__name__}Apply"
         self.applyButton.setToolTip(_("Apply smoothing to selected segment"))
         self.scriptedEffect.addOptionsWidget(self.applyButton)
 
@@ -126,7 +126,11 @@ If segments overlap, segment higher in the segments table will have priority. <b
     def updateParameterWidgetsVisibility(self):
         methodIndex = self.methodSelectorComboBox.currentIndex
         smoothingMethod = self.methodSelectorComboBox.itemData(methodIndex)
-        morphologicalMethod = (smoothingMethod == MEDIAN or smoothingMethod == MORPHOLOGICAL_OPENING or smoothingMethod == MORPHOLOGICAL_CLOSING)
+        morphologicalMethod = smoothingMethod in [
+            MEDIAN,
+            MORPHOLOGICAL_OPENING,
+            MORPHOLOGICAL_CLOSING,
+        ]
         self.kernelSizeMMLabel.setVisible(morphologicalMethod)
         self.kernelSizeMMSpinBox.setVisible(morphologicalMethod)
         self.kernelSizePixel.setVisible(morphologicalMethod)
@@ -139,14 +143,28 @@ If segments overlap, segment higher in the segments table will have priority. <b
 
     def getKernelSizePixel(self):
         selectedSegmentLabelmapSpacing = [1.0, 1.0, 1.0]
-        selectedSegmentLabelmap = self.scriptedEffect.selectedSegmentLabelmap()
-        if selectedSegmentLabelmap:
+        if (
+            selectedSegmentLabelmap := self.scriptedEffect.selectedSegmentLabelmap()
+        ):
             selectedSegmentLabelmapSpacing = selectedSegmentLabelmap.GetSpacing()
 
         # size rounded to nearest odd number. If kernel size is even then image gets shifted.
         kernelSizeMM = self.scriptedEffect.doubleParameter("KernelSizeMm")
-        kernelSizePixel = [int(round((kernelSizeMM / selectedSegmentLabelmapSpacing[componentIndex] + 1) / 2) * 2 - 1) for componentIndex in range(3)]
-        return kernelSizePixel
+        return [
+            int(
+                round(
+                    (
+                        kernelSizeMM
+                        / selectedSegmentLabelmapSpacing[componentIndex]
+                        + 1
+                    )
+                    / 2
+                )
+                * 2
+                - 1
+            )
+            for componentIndex in range(3)
+        ]
 
     def updateGUIFromMRML(self):
         methodIndex = self.methodSelectorComboBox.findData(self.scriptedEffect.parameter("SmoothingMethod"))
@@ -316,7 +334,7 @@ If segments overlap, segment higher in the segments table will have priority. <b
 
                 thresh2 = vtk.vtkImageThreshold()
                 thresh2.SetInputConnection(gaussianFilter.GetOutputPort())
-                thresh2.ThresholdByUpper(int(maxValue / 2))
+                thresh2.ThresholdByUpper(maxValue // 2)
                 thresh2.SetInValue(1)
                 thresh2.SetOutValue(0)
                 thresh2.SetOutputScalarType(selectedSegmentLabelmap.GetScalarType())
@@ -404,11 +422,8 @@ If segments overlap, segment higher in the segments table will have priority. <b
         convertToPolyData.SetInputConnection(ici.GetOutputPort())
         convertToPolyData.SetNumberOfContours(len(segmentLabelValues))
 
-        contourIndex = 0
-        for segmentId, labelValue in segmentLabelValues:
+        for contourIndex, (segmentId, labelValue) in enumerate(segmentLabelValues):
             convertToPolyData.SetValue(contourIndex, labelValue)
-            contourIndex += 1
-
         # Low-pass filtering using Taubin's method
         smoothingFactor = self.scriptedEffect.doubleParameter("JointTaubinSmoothingFactor")
         smoothingIterations = 100  # according to VTK documentation 10-20 iterations could be enough but we use a higher value to reduce chance of shrinking

@@ -12,7 +12,7 @@ class SlicerUtilGetNodeTest(unittest.TestCase):
 
     @staticmethod
     def _configure_scene(scene):
-        nodes = [slicer.vtkMRMLScalarVolumeNode() for idx in range(4)]
+        nodes = [slicer.vtkMRMLScalarVolumeNode() for _ in range(4)]
         scene.AddNode(nodes[0]).SetName("Volume1")
         scene.AddNode(nodes[1]).SetName("Volume2")
         scene.AddNode(nodes[2]).SetName("Volume")

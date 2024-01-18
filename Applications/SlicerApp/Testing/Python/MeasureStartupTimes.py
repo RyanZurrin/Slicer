@@ -44,7 +44,6 @@ def TemporaryPythonScript(code, *args, **kwargs):
 
 
 def collect_startup_times_normal(output_file, drop_cache=False, display_output=False):
-    results = {}
     test = []
     (duration, result) = runSlicerAndExitWithTime(slicer_executable, test, drop_cache=drop_cache)
     (returnCode, stdout, stderr) = result
@@ -53,18 +52,15 @@ def collect_startup_times_normal(output_file, drop_cache=False, display_output=F
             print("STDOUT [%s]\n" % stdout)
         if stderr and returnCode == EXIT_SUCCESS:
             print("STDERR [%s]\n" % stderr)
-    results[" ".join(test)] = duration
+    results = {" ".join(test): duration}
     with open(output_file, "w") as file:
         file.write(json.dumps(results, indent=4))
 
 
 def collect_startup_times_overall(output_file, drop_cache=False, display_output=False):
-    results = {}
-
     test = ["--help"]
     (duration, result) = runSlicerAndExitWithTime(slicer_executable, test, drop_cache=drop_cache)
-    results[" ".join(test)] = duration
-
+    results = {" ".join(test): duration}
     tests = [
         [],
         ["--disable-builtin-cli-modules"],
@@ -204,7 +200,7 @@ def collect_startup_times_modules_to_load(output_file, modules_to_load, module_l
     modules = collect_modules(module_list)
     modulesToIgnore = list(modules.keys())
     for moduleName in modules_to_load.split(","):
-        print("Including %s" % moduleName)
+        print(f"Including {moduleName}")
         del modulesToIgnore[modulesToIgnore.index(moduleName)]
 
     test = ["--testing", "--modules-to-ignore", ",".join(modulesToIgnore)]
@@ -216,8 +212,7 @@ def collect_startup_times_modules_to_load(output_file, modules_to_load, module_l
         if stderr and returnCode == EXIT_SUCCESS:
             print("STDERR [%s]\n" % stderr)
 
-    results = {}
-    results[" ".join(modulesToIgnore)] = duration
+    results = {" ".join(modulesToIgnore): duration}
     with open(output_file, "w") as file:
         file.write(json.dumps(results, indent=4))
 
@@ -248,7 +243,7 @@ if __name__ == "__main__":
     runSlicerAndExitWithTime = timecall(runSlicerAndExit, repeat=args.repeat)
 
     sliver_revision = slicerRevision()
-    module_list = "Modules-r%s.json" % sliver_revision
+    module_list = f"Modules-r{sliver_revision}.json"
 
     if args.reuse_module_list:
         print("Loading existing module listing")
@@ -262,7 +257,9 @@ if __name__ == "__main__":
     # Since the "normal" experiment is included in the "overall" one,
     # it is not executed by default.
     if args.normal:
-        collect_startup_times_normal("StartupTimesNormal-r%s.json" % sliver_revision, **common_kwargs)
+        collect_startup_times_normal(
+            f"StartupTimesNormal-r{sliver_revision}.json", **common_kwargs
+        )
 
     # Since the "modules-to-load" experiment requires user input and is provided
     # for convenience, it is not executed by default.
@@ -271,12 +268,20 @@ if __name__ == "__main__":
             "StartupTimesSelectedModules.json", args.modules_to_load, module_list, **common_kwargs)
 
     if all or args.overall:
-        collect_startup_times_overall("StartupTimes-r%s.json" % sliver_revision, **common_kwargs)
+        collect_startup_times_overall(
+            f"StartupTimes-r{sliver_revision}.json", **common_kwargs
+        )
 
     if all or args.excluding_one_module:
         collect_startup_times_excluding_one_module(
-            "StartupTimesExcludingOneModule-r%s.json" % sliver_revision, module_list, **common_kwargs)
+            f"StartupTimesExcludingOneModule-r{sliver_revision}.json",
+            module_list,
+            **common_kwargs,
+        )
 
     if all or args.including_one_module:
         collect_startup_times_including_one_module(
-            "StartupTimesIncludingOneModule-r%s.json" % sliver_revision, module_list, **common_kwargs)
+            f"StartupTimesIncludingOneModule-r{sliver_revision}.json",
+            module_list,
+            **common_kwargs,
+        )

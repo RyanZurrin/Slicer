@@ -80,12 +80,7 @@ class FiducialLayoutSwitchBug1914Test(ScriptedLoadableModuleTest):
     def test_FiducialLayoutSwitchBug1914(self):
         # test difference in display location and then in RAS if this is too fine
         maximumDisplayDifference = 1.0
-        # for future testing: take into account the volume voxel size
-        maximumRASDifference = 1.0
-
         enableScreenshots = 0
-        screenshotScaleFactor = 1
-
         logic = FiducialLayoutSwitchBug1914Logic()
         logging.info("ctest, please don't truncate my output: CTEST_FULL_OUTPUT")
 
@@ -166,6 +161,9 @@ class FiducialLayoutSwitchBug1914Test(ScriptedLoadableModuleTest):
                 rasDiff = math.sqrt(rasDiff)
             print("Checking the difference between point RAS position", seedRAS,
                   "and volume RAS as derived from the point display position", volumeRAS, ": ", rasDiff)
+            # for future testing: take into account the volume voxel size
+            maximumRASDifference = 1.0
+
             if rasDiff > maximumRASDifference:
                 raise Exception(f"RAS coordinate difference is too large as well!\nExpected < {maximumRASDifference:g} but got {rasDiff:g}")
             else:
@@ -185,6 +183,8 @@ class FiducialLayoutSwitchBug1914Test(ScriptedLoadableModuleTest):
             shotDiff = imageMath.GetOutput()
             # save it as a scene view
             annotationLogic = slicer.modules.annotations.logic()
+            screenshotScaleFactor = 1
+
             annotationLogic.CreateSnapShot("FiducialLayoutSwitchBug1914-Diff", "Difference between starting and ending point positions",
                                            slicer.qMRMLScreenShotDialog.Red, screenshotScaleFactor, shotDiff)
             # calculate the image difference

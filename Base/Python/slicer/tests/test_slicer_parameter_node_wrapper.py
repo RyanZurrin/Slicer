@@ -18,8 +18,7 @@ from slicer.parameterNodeWrapper import *
 
 
 def newParameterNode():
-    node = slicer.mrmlScene.AddNewNodeByClass("vtkMRMLScriptedModuleNode")
-    return node
+    return slicer.mrmlScene.AddNewNodeByClass("vtkMRMLScriptedModuleNode")
 
 
 @dataclasses.dataclass
@@ -98,9 +97,8 @@ class AnotherCustomClassSerializer(Serializer):
         val = parameterNode.GetParameter(name)
         if val == "None":
             return None
-        else:
-            vals = val.split(",")
-            return AnotherCustomClass(int(vals[0]), int(vals[1]), int(vals[2]))
+        vals = val.split(",")
+        return AnotherCustomClass(int(vals[0]), int(vals[1]), int(vals[2]))
 
     def remove(self, parameterNode, name: str) -> None:
         parameterNode.UnsetParameter(name)
@@ -221,11 +219,15 @@ class TypedParameterNodeTest(unittest.TestCase):
             param.isCached("notExistentParameter")
 
     def test_custom_validator(self):
+
+
+
         class Is777Or778(Validator):
             @staticmethod
             def validate(value):
-                if value != 777 and value != 778:
+                if value not in [777, 778]:
                     raise ValueError("Twas not 777 or 778")
+
 
         @parameterNodeWrapper
         class ParameterNodeType:

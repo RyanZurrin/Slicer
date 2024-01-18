@@ -15,10 +15,7 @@ class Default:
 
     @property
     def value(self):
-        if self._generator:
-            return self._generator()
-        else:
-            return self._value
+        return self._generator() if self._generator else self._value
 
     def __repr__(self) -> str:
         return f"Default(value={self._value}, generator={self._generator})"

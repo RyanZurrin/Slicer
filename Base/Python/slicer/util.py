@@ -68,7 +68,7 @@ def _readCMakeCache(var):
     import os
     from slicer import app
 
-    prefix = var + ":"
+    prefix = f"{var}:"
 
     try:
         with open(os.path.join(app.slicerHome, "CMakeCache.txt")) as cache:
@@ -231,7 +231,7 @@ def lookupTopLevelWidget(objectName):
             if w.objectName == objectName:
                 return w
     # not found
-    raise RuntimeError("Failed to obtain reference to '%s'" % objectName)
+    raise RuntimeError(f"Failed to obtain reference to '{objectName}'")
 
 
 def mainWindow():
@@ -256,10 +256,10 @@ def pythonShell():
     """
     from slicer import app
 
-    console = app.pythonConsole()
-    if not console:
+    if console := app.pythonConsole():
+        return console
+    else:
         raise RuntimeError("Failed to obtain reference to python shell")
-    return console
 
 
 def showStatusMessage(message, duration=0):
@@ -294,10 +294,7 @@ def findChildren(widget=None, name="", text="", title="", className=""):
     children = []
     parents = [widget]
     kwargs = {"name": name, "text": text, "title": title, "className": className}
-    expected_matches = []
-    for kwarg in kwargs.keys():
-        if kwargs[kwarg]:
-            expected_matches.append(kwarg)
+    expected_matches = [kwarg for kwarg, value in kwargs.items() if value]
     while parents:
         p = parents.pop()
         # sometimes, p is null, f.e. when using --python-script or --python-code
@@ -329,7 +326,7 @@ def findChild(widget, name):
 
     :raises RuntimeError: if the widget with the given ``name`` does not exist.
     """
-    errorMessage = "Widget named " + str(name) + " does not exist."
+    errorMessage = f"Widget named {str(name)} does not exist."
     child = None
     try:
         child = findChildren(widget, name=name)[0]
@@ -350,13 +347,13 @@ def loadUI(path):
 
     qfile = qt.QFile(path)
     if not qfile.exists():
-        errorMessage = "Could not load UI file: file not found " + str(path) + "\n\n"
+        errorMessage = f"Could not load UI file: file not found {str(path)}" + "\n\n"
         raise RuntimeError(errorMessage)
     qfile.open(qt.QFile.ReadOnly)
     loader = qt.QUiLoader()
     widget = loader.load(qfile)
     if not widget:
-        errorMessage = "Could not load UI file: " + str(path) + "\n\n"
+        errorMessage = f"Could not load UI file: {str(path)}" + "\n\n"
         raise RuntimeError(errorMessage)
     return widget
 
@@ -482,16 +479,10 @@ def updateParameterEditWidgetsFromNode(parameterEditWidgets, parameterNode):
         widgetClassName = widget.className()
         parameterValue = parameterNode.GetParameter(parameterName)
         if widgetClassName == "QSpinBox":
-            if parameterValue:
-                widget.value = int(float(parameterValue))
-            else:
-                widget.value = 0
+            widget.value = int(float(parameterValue)) if parameterValue else 0
         if widgetClassName == "ctkSliderWidget":
-            if parameterValue:
-                widget.value = float(parameterValue)
-            else:
-                widget.value = 0.0
-        elif widgetClassName == "QCheckBox" or widgetClassName == "QPushButton":
+            widget.value = float(parameterValue) if parameterValue else 0.0
+        elif widgetClassName in ["QCheckBox", "QPushButton"]:
             widget.checked = parameterValue == "true"
         elif widgetClassName == "QComboBox":
             widget.setCurrentText(parameterValue)
@@ -514,9 +505,9 @@ def updateNodeFromParameterEditWidgets(parameterEditWidgets, parameterNode):
 
     for widget, parameterName in parameterEditWidgets:
         widgetClassName = widget.className()
-        if widgetClassName == "QSpinBox" or widgetClassName == "ctkSliderWidget":
+        if widgetClassName in ["QSpinBox", "ctkSliderWidget"]:
             parameterNode.SetParameter(parameterName, str(widget.value))
-        elif widgetClassName == "QCheckBox" or widgetClassName == "QPushButton":
+        elif widgetClassName in ["QCheckBox", "QPushButton"]:
             parameterNode.SetParameter(parameterName, "true" if widget.checked else "false")
         elif widgetClassName == "QComboBox":
             parameterNode.SetParameter(parameterName, widget.currentText)
@@ -628,10 +619,10 @@ def setPythonConsoleVisible(visible):
 
     If there is no main window then the function has no effect.
     """
-    mw = mainWindow()
-    if not mw:
+    if mw := mainWindow():
+        mw.pythonConsole().parent().setVisible(visible)
+    else:
         return
-    mw.pythonConsole().parent().setVisible(visible)
 
 
 def setErrorLogVisible(visible):
@@ -639,10 +630,10 @@ def setErrorLogVisible(visible):
 
     If there is no main window then the function has no effect.
     """
-    mw = mainWindow()
-    if not mw:
+    if mw := mainWindow():
+        mw.errorLogDockWidget().setVisible(visible)
+    else:
         return
-    mw.errorLogDockWidget().setVisible(visible)
 
 
 def setStatusBarVisible(visible):
@@ -831,9 +822,8 @@ def loadMarkupsFiducialList(filename, returnNode=False):
     """
     if returnNode:
         return loadMarkups(filename)
-    else:
-        node = loadMarkups(filename)
-        return [node is not None, node]
+    node = loadMarkups(filename)
+    return [node is not None, node]
 
 
 def loadMarkupsCurve(filename):
@@ -1194,10 +1184,10 @@ def moduleSelector():
     :return: module widget object
     :raises RuntimeError: if there is no module selector (for example, the application runs without a main window).
     """
-    mw = mainWindow()
-    if not mw:
+    if mw := mainWindow():
+        return mw.moduleSelector()
+    else:
         raise RuntimeError("Could not find main window")
-    return mw.moduleSelector()
 
 
 def selectModule(module):
@@ -1211,10 +1201,10 @@ def selectModule(module):
     moduleName = module
     if not isinstance(module, str):
         moduleName = module.name
-    selector = moduleSelector()
-    if not selector:
+    if selector := moduleSelector():
+        moduleSelector().selectModule(moduleName)
+    else:
         raise RuntimeError("Could not find moduleSelector in the main window")
-    moduleSelector().selectModule(moduleName)
 
 
 def selectedModule():
@@ -1223,10 +1213,10 @@ def selectedModule():
     :return: module object
     :raises RuntimeError: in case of failure (no such module or the application runs without a main window).
     """
-    selector = moduleSelector()
-    if not selector:
+    if selector := moduleSelector():
+        return selector.selectedModule
+    else:
         raise RuntimeError("Could not find moduleSelector in the main window")
-    return selector.selectedModule
 
 
 def moduleNames():
@@ -1247,10 +1237,10 @@ def getModule(moduleName):
     """
     from slicer import app
 
-    module = app.moduleManager().module(moduleName)
-    if not module:
-        raise RuntimeError("Could not find module with name '%s'" % moduleName)
-    return module
+    if module := app.moduleManager().module(moduleName):
+        return module
+    else:
+        raise RuntimeError(f"Could not find module with name '{moduleName}'")
 
 
 def getModuleGui(module):
@@ -1282,15 +1272,18 @@ def getModuleWidget(module):
 
     if isinstance(module, str):
         module = getModule(module)
-    widgetRepr = module.widgetRepresentation()
-    if not widgetRepr:
-        raise RuntimeError("Could not find module widget representation with name '%s'" % module.name)
-    if isinstance(widgetRepr, slicer.qSlicerScriptedLoadableModuleWidget):
-        # Scripted module, return the Python class
-        return widgetRepr.self()
+    if widgetRepr := module.widgetRepresentation():
+        return (
+            widgetRepr.self()
+            if isinstance(
+                widgetRepr, slicer.qSlicerScriptedLoadableModuleWidget
+            )
+            else widgetRepr
+        )
     else:
-        # C++ module
-        return widgetRepr
+        raise RuntimeError(
+            f"Could not find module widget representation with name '{module.name}'"
+        )
 
 
 def getNewModuleWidget(module):
@@ -1308,15 +1301,18 @@ def getNewModuleWidget(module):
 
     if isinstance(module, str):
         module = getModule(module)
-    widgetRepr = module.createNewWidgetRepresentation()
-    if not widgetRepr:
-        raise RuntimeError("Could not find module widget representation with name '%s'" % module.name)
-    if isinstance(widgetRepr, slicer.qSlicerScriptedLoadableModuleWidget):
-        # Scripted module, return the Python class
-        return widgetRepr.self()
+    if widgetRepr := module.createNewWidgetRepresentation():
+        return (
+            widgetRepr.self()
+            if isinstance(
+                widgetRepr, slicer.qSlicerScriptedLoadableModuleWidget
+            )
+            else widgetRepr
+        )
     else:
-        # C++ module
-        return widgetRepr
+        raise RuntimeError(
+            f"Could not find module widget representation with name '{module.name}'"
+        )
 
 
 def getModuleLogic(module):
@@ -1341,7 +1337,9 @@ def getModuleLogic(module):
     else:
         logic = module.logic()
     if not logic:
-        raise RuntimeError("Could not find module widget representation with name '%s'" % module.name)
+        raise RuntimeError(
+            f"Could not find module widget representation with name '{module.name}'"
+        )
     return logic
 
 
@@ -1353,7 +1351,7 @@ def modulePath(moduleName):
     """
     import slicer  # noqa: F401
 
-    return eval("slicer.modules.%s.path" % moduleName.lower())
+    return eval(f"slicer.modules.{moduleName.lower()}.path")
 
 
 def reloadScriptedModule(moduleName):
@@ -1376,7 +1374,7 @@ def reloadScriptedModule(moduleName):
     import imp, sys, os
     import slicer
 
-    widgetName = moduleName + "Widget"
+    widgetName = f"{moduleName}Widget"
 
     # reload the source code
     filePath = modulePath(moduleName)
@@ -1390,7 +1388,7 @@ def reloadScriptedModule(moduleName):
             moduleName, fp, filePath, (".py", "r", imp.PY_SOURCE))
 
     # find and hide the existing widget
-    parent = eval("slicer.modules.%s.widgetRepresentation()" % moduleName.lower())
+    parent = eval(f"slicer.modules.{moduleName.lower()}.widgetRepresentation()")
     for child in parent.children():
         try:
             child.hide()
@@ -1407,10 +1405,10 @@ def reloadScriptedModule(moduleName):
         if hasattr(widget, "_onModuleAboutToBeUnloaded"):
             slicer.app.moduleManager().disconnect("moduleAboutToBeUnloaded(QString)", widget._onModuleAboutToBeUnloaded)
 
-    # remove layout items (remaining spacer items would add space above the widget)
-    items = []
-    for itemIndex in range(parent.layout().count()):
-        items.append(parent.layout().itemAt(itemIndex))
+    items = [
+        parent.layout().itemAt(itemIndex)
+        for itemIndex in range(parent.layout().count())
+    ]
     for item in items:
         parent.layout().removeItem(item)
 
@@ -1561,10 +1559,12 @@ def getNode(pattern="*", index=0, scene=None):
     :raises MRMLNodeNotFoundException: if no node is found
      that matches the specified pattern.
     """
-    nodes = getNodes(pattern, scene)
-    if not nodes:
-        raise MRMLNodeNotFoundException("could not find nodes in the scene by name or id '%s'" % (pattern if (isinstance(pattern, str)) else ""))
-    return list(nodes.values())[index]
+    if nodes := getNodes(pattern, scene):
+        return list(nodes.values())[index]
+    else:
+        raise MRMLNodeNotFoundException(
+            f"""could not find nodes in the scene by name or id '{pattern if isinstance(pattern, str) else ""}'"""
+        )
 
 
 def getNodesByClass(className, scene=None):
@@ -1577,10 +1577,8 @@ def getNodesByClass(className, scene=None):
     nodes.UnRegister(slicer.mrmlScene)
     nodeList = []
     nodes.InitTraversal()
-    node = nodes.GetNextItemAsObject()
-    while node:
+    while node := nodes.GetNextItemAsObject():
         nodeList.append(node)
-        node = nodes.GetNextItemAsObject()
     return nodeList
 
 
@@ -1662,16 +1660,16 @@ def getSubjectHierarchyItemChildren(parentItem=None, recursive=False):
     """
     import slicer, vtk
 
-    children = []
     shNode = slicer.mrmlScene.GetSubjectHierarchyNode()
     # Use scene as parent item if not given
     if not parentItem:
         parentItem = shNode.GetSceneItemID()
     childrenIdList = vtk.vtkIdList()
     shNode.GetItemChildren(parentItem, childrenIdList, recursive)
-    for childIndex in range(childrenIdList.GetNumberOfIds()):
-        children.append(childrenIdList.GetId(childIndex))
-    return children
+    return [
+        childrenIdList.GetId(childIndex)
+        for childIndex in range(childrenIdList.GetNumberOfIds())
+    ]
 
 
 #
@@ -1709,7 +1707,7 @@ def array(pattern="", index=0):
         return arrayFromTransformMatrix(node)
 
     # TODO: accessors for other node types: polydata (verts, polys...), colors
-    raise RuntimeError("Cannot get node " + node.GetID() + " as array")
+    raise RuntimeError(f"Cannot get node {node.GetID()} as array")
 
 
 def arrayFromVolume(volumeNode):
@@ -1748,7 +1746,7 @@ def arrayFromVolume(volumeNode):
     elif volumeNode.GetClassName() in tensorTypes:
         narray = vtk.util.numpy_support.vtk_to_numpy(vimage.GetPointData().GetTensors()).reshape(nshape + (3, 3))
     else:
-        raise RuntimeError("Unsupported volume type: " + volumeNode.GetClassName())
+        raise RuntimeError(f"Unsupported volume type: {volumeNode.GetClassName()}")
     return narray
 
 
@@ -1777,8 +1775,7 @@ def arrayFromModelPoints(modelNode):
     import vtk.util.numpy_support
 
     pointData = modelNode.GetMesh().GetPoints().GetData()
-    narray = vtk.util.numpy_support.vtk_to_numpy(pointData)
-    return narray
+    return vtk.util.numpy_support.vtk_to_numpy(pointData)
 
 
 def arrayFromModelPointsModified(modelNode):
@@ -1808,8 +1805,9 @@ def _vtkArrayFromModelData(modelNode, arrayName, location):
     arrayVtk = modelData.GetArray(arrayName)
     if not arrayVtk:
         availableArrayNames = [modelData.GetArrayName(i) for i in range(modelData.GetNumberOfArrays())]
-        raise ValueError("Input modelNode does not contain {} data array '{}'. Available array names: '{}'".format(
-            location, arrayName, "', '".join(availableArrayNames)))
+        raise ValueError(
+            f"""Input modelNode does not contain {location} data array '{arrayName}'. Available array names: '{"', '".join(availableArrayNames)}'"""
+        )
     return arrayVtk
 
 
@@ -1823,8 +1821,7 @@ def arrayFromModelPointData(modelNode, arrayName):
     import vtk.util.numpy_support
 
     arrayVtk = _vtkArrayFromModelData(modelNode, arrayName, "point")
-    narray = vtk.util.numpy_support.vtk_to_numpy(arrayVtk)
-    return narray
+    return vtk.util.numpy_support.vtk_to_numpy(arrayVtk)
 
 
 def arrayFromModelPointDataModified(modelNode, arrayName):
@@ -1843,8 +1840,7 @@ def arrayFromModelCellData(modelNode, arrayName):
     import vtk.util.numpy_support
 
     arrayVtk = _vtkArrayFromModelData(modelNode, arrayName, "cell")
-    narray = vtk.util.numpy_support.vtk_to_numpy(arrayVtk)
-    return narray
+    return vtk.util.numpy_support.vtk_to_numpy(arrayVtk)
 
 
 def arrayFromModelCellDataModified(modelNode, arrayName):
@@ -1866,8 +1862,7 @@ def arrayFromMarkupsControlPointData(markupsNode, arrayName):
         measurement = markupsNode.GetNthMeasurement(measurementIndex)
         doubleArrayVtk = measurement.GetControlPointValues()
         if doubleArrayVtk and doubleArrayVtk.GetName() == arrayName:
-            narray = vtk.util.numpy_support.vtk_to_numpy(doubleArrayVtk)
-            return narray
+            return vtk.util.numpy_support.vtk_to_numpy(doubleArrayVtk)
 
 
 def arrayFromMarkupsControlPointDataModified(markupsNode, arrayName):
@@ -1900,8 +1895,7 @@ def arrayFromModelPolyIds(modelNode):
     import vtk.util.numpy_support
 
     arrayVtk = modelNode.GetPolyData().GetPolys().GetData()
-    narray = vtk.util.numpy_support.vtk_to_numpy(arrayVtk)
-    return narray
+    return vtk.util.numpy_support.vtk_to_numpy(arrayVtk)
 
 
 def arrayFromGridTransform(gridTransformNode):
@@ -1921,8 +1915,9 @@ def arrayFromGridTransform(gridTransformNode):
     import vtk.util.numpy_support
 
     nshape = nshape + (3,)
-    narray = vtk.util.numpy_support.vtk_to_numpy(displacementGrid.GetPointData().GetScalars()).reshape(nshape)
-    return narray
+    return vtk.util.numpy_support.vtk_to_numpy(
+        displacementGrid.GetPointData().GetScalars()
+    ).reshape(nshape)
 
 
 def arrayFromVTKMatrix(vmatrix):
@@ -1971,7 +1966,9 @@ def vtkMatrixFromArray(narray):
         updateVTKMatrixFromArray(vmatrix, narray)
         return vmatrix
     else:
-        raise RuntimeError("Unsupported numpy array shape: " + str(narrayshape) + " expected (4,4)")
+        raise RuntimeError(
+            f"Unsupported numpy array shape: {str(narrayshape)} expected (4,4)"
+        )
 
 
 def updateVTKMatrixFromArray(vmatrix, narray):
@@ -2017,7 +2014,9 @@ def arrayFromTransformMatrix(transformNode, toWorld=False):
     else:
         success = transformNode.GetMatrixTransformToParent(vmatrix)
     if not success:
-        raise RuntimeError("Failed to get transformation matrix from node " + transformNode.GetID())
+        raise RuntimeError(
+            f"Failed to get transformation matrix from node {transformNode.GetID()}"
+        )
     return arrayFromVTKMatrix(vmatrix)
 
 
@@ -2034,7 +2033,9 @@ def updateTransformMatrixFromArray(transformNode, narray, toWorld=False):
 
     narrayshape = narray.shape
     if narrayshape != (4, 4):
-        raise RuntimeError("Unsupported numpy array shape: " + str(narrayshape) + " expected (4,4)")
+        raise RuntimeError(
+            f"Unsupported numpy array shape: {str(narrayshape)} expected (4,4)"
+        )
     if toWorld and transformNode.GetParentTransformNode():
         # thisToParent = worldToParent * thisToWorld = inv(parentToWorld) * toWorld
         narrayParentToWorld = arrayFromTransformMatrix(transformNode.GetParentTransformNode())
@@ -2098,8 +2099,9 @@ def arrayFromSegmentInternalBinaryLabelmap(segmentationNode, segmentId):
     nshape = tuple(reversed(vimage.GetDimensions()))
     import vtk.util.numpy_support
 
-    narray = vtk.util.numpy_support.vtk_to_numpy(vimage.GetPointData().GetScalars()).reshape(nshape)
-    return narray
+    return vtk.util.numpy_support.vtk_to_numpy(
+        vimage.GetPointData().GetScalars()
+    ).reshape(nshape)
 
 
 def arrayFromSegmentBinaryLabelmap(segmentationNode, segmentId, referenceVolumeNode=None):
@@ -2125,8 +2127,8 @@ def arrayFromSegmentBinaryLabelmap(segmentationNode, segmentId, referenceVolumeN
     # Get reference volume
     if not referenceVolumeNode:
         referenceVolumeNode = segmentationNode.GetNodeReference(slicer.vtkMRMLSegmentationNode.GetReferenceImageGeometryReferenceRole())
-        if not referenceVolumeNode:
-            raise RuntimeError("No reference volume is found in the input segmentationNode, therefore a valid referenceVolumeNode input is required.")
+    if not referenceVolumeNode:
+        raise RuntimeError("No reference volume is found in the input segmentationNode, therefore a valid referenceVolumeNode input is required.")
 
     # Export segment as vtkImageData (via temporary labelmap volume node)
     segmentIds = vtk.vtkStringArray()
@@ -2167,8 +2169,8 @@ def updateSegmentBinaryLabelmapFromArray(narray, segmentationNode, segmentId, re
     # Get reference volume
     if not referenceVolumeNode:
         referenceVolumeNode = segmentationNode.GetNodeReference(slicer.vtkMRMLSegmentationNode.GetReferenceImageGeometryReferenceRole())
-        if not referenceVolumeNode:
-            raise RuntimeError("No reference volume is found in the input segmentationNode, therefore a valid referenceVolumeNode input is required.")
+    if not referenceVolumeNode:
+        raise RuntimeError("No reference volume is found in the input segmentationNode, therefore a valid referenceVolumeNode input is required.")
 
     # Update segment in segmentation
     labelmapVolumeNode = slicer.modules.volumes.logic().CreateAndAddLabelVolume(referenceVolumeNode, "__temp__")
@@ -2226,7 +2228,9 @@ def updateMarkupsControlPointsFromArray(markupsNode, narray, world=False):
         markupsNode.RemoveAllControlPoints()
         return
     if len(narrayshape) != 2 or narrayshape[1] != 3:
-        raise RuntimeError("Unsupported numpy array shape: " + str(narrayshape) + " expected (N,3)")
+        raise RuntimeError(
+            f"Unsupported numpy array shape: {str(narrayshape)} expected (N,3)"
+        )
     numberOfControlPoints = narrayshape[0]
     oldNumberOfControlPoints = markupsNode.GetNumberOfControlPoints()
     # Update existing control points
@@ -2266,8 +2270,7 @@ def arrayFromMarkupsCurvePoints(markupsNode, world=False):
         pointData = markupsNode.GetCurvePointsWorld().GetData()
     else:
         pointData = markupsNode.GetCurvePoints().GetData()
-    narray = vtk.util.numpy_support.vtk_to_numpy(pointData)
-    return narray
+    return vtk.util.numpy_support.vtk_to_numpy(pointData)
 
 
 def arrayFromMarkupsCurveData(markupsNode, arrayName, world=False):
@@ -2295,16 +2298,16 @@ def arrayFromMarkupsCurveData(markupsNode, arrayName, world=False):
         curvePolyData = markupsNode.GetCurve()
     pointData = curvePolyData.GetPointData()
     if not pointData or pointData.GetNumberOfArrays() == 0:
-        raise ValueError(f"Input markups curve does not contain point data")
+        raise ValueError("Input markups curve does not contain point data")
 
     arrayVtk = pointData.GetArray(arrayName)
     if not arrayVtk:
         availableArrayNames = [pointData.GetArrayName(i) for i in range(pointData.GetNumberOfArrays())]
-        raise ValueError("Input markupsNode does not contain curve point data array '{}'. Available array names: '{}'".format(
-            arrayName, "', '".join(availableArrayNames)))
+        raise ValueError(
+            f"""Input markupsNode does not contain curve point data array '{arrayName}'. Available array names: '{"', '".join(availableArrayNames)}'"""
+        )
 
-    narray = vtk.util.numpy_support.vtk_to_numpy(arrayVtk)
-    return narray
+    return vtk.util.numpy_support.vtk_to_numpy(arrayVtk)
 
 
 def updateVolumeFromArray(volumeNode, narray):
@@ -2348,7 +2351,7 @@ def updateVolumeFromArray(volumeNode, narray):
         vshape = vshape[1:4]
     else:
         # TODO: add support for tensor volumes
-        raise RuntimeError("Unsupported numpy array shape: " + str(narray.shape))
+        raise RuntimeError(f"Unsupported numpy array shape: {str(narray.shape)}")
 
     vimage = volumeNode.GetImageData()
     if not vimage:
@@ -2438,8 +2441,7 @@ def arrayFromTableColumn(tableNode, columnName):
     import vtk.util.numpy_support
 
     columnData = tableNode.GetTable().GetColumnByName(columnName)
-    narray = vtk.util.numpy_support.vtk_to_numpy(columnData)
-    return narray
+    return vtk.util.numpy_support.vtk_to_numpy(columnData)
 
 
 def arrayFromTableColumnModified(tableNode, columnName):
@@ -2476,10 +2478,12 @@ def updateTableFromArray(tableNode, narrays, columnNames=None):
         ncolumns = [narrays]
     elif isinstance(narrays, np.ndarray) and len(narrays.shape) == 2:
         ncolumns = narrays.T
-    elif isinstance(narrays, tuple) or isinstance(narrays, list):
+    elif isinstance(narrays, (tuple, list)):
         ncolumns = narrays
     else:
-        raise ValueError("Expected narrays is a numpy ndarray, or tuple or list of numpy ndarrays, got %s instead." % (str(type(narrays))))
+        raise ValueError(
+            f"Expected narrays is a numpy ndarray, or tuple or list of numpy ndarrays, got {str(type(narrays))} instead."
+        )
     tableNode.RemoveAllColumns()
     # Convert single string to a single-element string list
     if columnNames is None:
@@ -2522,14 +2526,16 @@ def dataframeFromTable(tableNode):
         numberOfComponents = vcolumn.GetNumberOfComponents()
         if numberOfComponents == 1:
             # most common, simple case
-            for rowIndex in range(vcolumn.GetNumberOfValues()):
-                column.append(vcolumn.GetValue(rowIndex))
+            column.extend(
+                vcolumn.GetValue(rowIndex)
+                for rowIndex in range(vcolumn.GetNumberOfValues())
+            )
         else:
             # rare case: column contains multiple components
             valueIndex = 0
-            for rowIndex in range(vcolumn.GetNumberOfTuples()):
+            for _ in range(vcolumn.GetNumberOfTuples()):
                 item = []
-                for componentIndex in range(numberOfComponents):
+                for _ in range(numberOfComponents):
                     item.append(vcolumn.GetValue(valueIndex))
                     valueIndex += 1
                 column.append(item)
@@ -2573,15 +2579,17 @@ def dataframeFromMarkups(markupsNode):
         selected.append(markupsNode.GetNthControlPointSelected(controlPointIndex) != 0)
         visible.append(markupsNode.GetNthControlPointVisibility(controlPointIndex) != 0)
 
-    dataframe = pd.DataFrame({
-        "label": label,
-        "position.R": positionWorldR,
-        "position.A": positionWorldA,
-        "position.S": positionWorldS,
-        "selected": selected,
-        "visible": visible,
-        "description": description})
-    return dataframe
+    return pd.DataFrame(
+        {
+            "label": label,
+            "position.R": positionWorldR,
+            "position.A": positionWorldA,
+            "position.S": positionWorldS,
+            "selected": selected,
+            "visible": visible,
+            "description": description,
+        }
+    )
 
 
 #
@@ -2950,7 +2958,7 @@ def confirmOkCancelDisplay(text, windowTitle=None, parent=None, **kwargs):
     import qt, slicer, logging
 
     if not windowTitle:
-        windowTitle = slicer.app.applicationName + " confirmation"
+        windowTitle = f"{slicer.app.applicationName} confirmation"
     result = _messageDisplay(logging.INFO, text, True, parent=parent, windowTitle=windowTitle, icon=qt.QMessageBox.Question,
                              standardButtons=qt.QMessageBox.Ok | qt.QMessageBox.Cancel, **kwargs)
     return result == qt.QMessageBox.Ok
@@ -2965,7 +2973,7 @@ def confirmYesNoDisplay(text, windowTitle=None, parent=None, **kwargs):
     import qt, slicer, logging
 
     if not windowTitle:
-        windowTitle = slicer.app.applicationName + " confirmation"
+        windowTitle = f"{slicer.app.applicationName} confirmation"
     result = _messageDisplay(logging.INFO, text, True, parent=parent, windowTitle=windowTitle, icon=qt.QMessageBox.Question,
                              standardButtons=qt.QMessageBox.Yes | qt.QMessageBox.No, **kwargs)
     return result == qt.QMessageBox.Yes
@@ -3009,7 +3017,7 @@ def _messageDisplay(logLevel, text, testingReturnValue, mainWindowNeeded=False, 
     logging.log(logLevel, text)
     logLevelString = logging.getLevelName(logLevel).lower()  # e.g. this is "error" when logLevel is logging.ERROR
     if not windowTitle:
-        windowTitle = slicer.app.applicationName + " " + logLevelString
+        windowTitle = f"{slicer.app.applicationName} {logLevelString}"
     if slicer.app.testingEnabled():
         logging.info(f"Testing mode is enabled: Returning {testingReturnValue} and skipping message box [{windowTitle}].")
         return testingReturnValue
@@ -3041,7 +3049,7 @@ def messageBox(text, parent=None, **kwargs):
 
     # if there is detailed text, make the dialog wider by making a long title
     if "detailedText" in kwargs:
-        windowTitle = kwargs["windowTitle"] if "windowTitle" in kwargs else slicer.app.applicationName
+        windowTitle = kwargs.get("windowTitle", slicer.app.applicationName)
         padding = " " * ((150 - len(windowTitle)) // 2)  # to center the title
         kwargs["windowTitle"] = padding + windowTitle + padding
 
@@ -3261,11 +3269,7 @@ def tryWithErrorDisplay(message=None, show=True, waitCursor=False):
         if waitCursor:
             slicer.app.restoreOverrideCursor()
         if show and not slicer.app.testingEnabled():
-            if message is not None:
-                errorMessage = f"{message}\n\n{e}"
-            else:
-                errorMessage = str(e)
-
+            errorMessage = f"{message}\n\n{e}" if message is not None else str(e)
             import traceback
 
             errorDisplay(errorMessage, detailedText=traceback.format_exc())
@@ -3349,7 +3353,7 @@ def clickAndDrag(widget, button="Left", start=(10, 10), end=(10, 40), steps=20, 
         down = lambda: None
         up = lambda: None
     else:
-        raise RuntimeError("Bad button - should be Left or Right, not %s" % button)
+        raise RuntimeError(f"Bad button - should be Left or Right, not {button}")
     if "Shift" in modifiers:
         interactor.SetShiftKey(1)
     if "Control" in modifiers:
@@ -3397,35 +3401,35 @@ def downloadFile(url, targetFilePath, checksum=None, reDownloadIfChecksumInvalid
             import traceback
 
             traceback.print_exc()
-            logging.error("Failed to download file from " + url)
+            logging.error(f"Failed to download file from {url}")
             return False
         if algo is not None:
             logging.info("Verifying checksum\n  %s" % targetFilePath)
             current_digest = computeChecksum(algo, targetFilePath)
-            if current_digest != digest:
+            if current_digest == digest:
+                logging.info("Checksum OK")
+            else:
                 logging.error("Downloaded file does not have expected checksum."
                               "\n   current checksum: %s"
                               "\n  expected checksum: %s" % (current_digest, digest))
                 return False
-            else:
-                logging.info("Checksum OK")
-    else:
-        if algo is not None:
-            current_digest = computeChecksum(algo, targetFilePath)
-            if current_digest != digest:
-                if reDownloadIfChecksumInvalid:
-                    logging.info("Requested file has been found but its checksum is different: deleting and re-downloading")
-                    os.remove(targetFilePath)
-                    return downloadFile(url, targetFilePath, checksum, reDownloadIfChecksumInvalid=False)
-                else:
-                    logging.error("Requested file has been found but its checksum is different:"
-                                  "\n   current checksum: %s"
-                                  "\n  expected checksum: %s" % (current_digest, digest))
-                    return False
-            else:
-                logging.info("Requested file has been found and checksum is OK: " + str(targetFilePath))
+    elif algo is not None:
+        current_digest = computeChecksum(algo, targetFilePath)
+        if current_digest == digest:
+            logging.info(
+                f"Requested file has been found and checksum is OK: {str(targetFilePath)}"
+            )
+        elif reDownloadIfChecksumInvalid:
+            logging.info("Requested file has been found but its checksum is different: deleting and re-downloading")
+            os.remove(targetFilePath)
+            return downloadFile(url, targetFilePath, checksum, reDownloadIfChecksumInvalid=False)
         else:
-            logging.info(f"Requested file has been found: {targetFilePath}")
+            logging.error("Requested file has been found but its checksum is different:"
+                          "\n   current checksum: %s"
+                          "\n  expected checksum: %s" % (current_digest, digest))
+            return False
+    else:
+        logging.info(f"Requested file has been found: {targetFilePath}")
     return True
 
 
@@ -3441,12 +3445,12 @@ def extractArchive(archiveFilePath, outputDir, expectedNumberOfExtractedFiles=No
     from slicer import app
 
     if not os.path.exists(archiveFilePath):
-        logging.error("Specified file %s does not exist" % (archiveFilePath))
+        logging.error(f"Specified file {archiveFilePath} does not exist")
         return False
     fileName, fileExtension = os.path.splitext(archiveFilePath)
     if fileExtension.lower() != ".zip":
         # TODO: Support other archive types
-        logging.error("Only zip archives are supported now, got " + fileExtension)
+        logging.error(f"Only zip archives are supported now, got {fileExtension}")
         return False
 
     numOfFilesInOutputDir = len(getFilesInDirectory(outputDir, False))
@@ -3478,15 +3482,15 @@ def computeChecksum(algo, filePath):
     import hashlib
 
     if algo not in ["SHA256", "SHA512", "MD5"]:
-        raise ValueError("unsupported hashing algorithm %s" % algo)
+        raise ValueError(f"unsupported hashing algorithm {algo}")
 
     with open(filePath, "rb") as content:
         hash = hashlib.new(algo)
         while True:
-            chunk = content.read(8192)
-            if not chunk:
+            if chunk := content.read(8192):
+                hash.update(chunk)
+            else:
                 break
-            hash.update(chunk)
         return hash.hexdigest()
 
 
@@ -3501,11 +3505,15 @@ def extractAlgoAndDigest(checksum):
     if checksum is None:
         return None, None
     if len(checksum.split(":")) != 2:
-        raise ValueError("invalid checksum '%s'. Expected format is '<algo>:<digest>'." % checksum)
+        raise ValueError(
+            f"invalid checksum '{checksum}'. Expected format is '<algo>:<digest>'."
+        )
     (algo, digest) = checksum.split(":")
     expected_algos = ["SHA256", "SHA512", "MD5"]
     if algo not in expected_algos:
-        raise ValueError("invalid algo '{}'. Algo must be one of {}".format(algo, ", ".join(expected_algos)))
+        raise ValueError(
+            f"""invalid algo '{algo}'. Algo must be one of {", ".join(expected_algos)}"""
+        )
     expected_digest_length = {"SHA256": 64, "SHA512": 128, "MD5": 32}
     if len(digest) != expected_digest_length[algo]:
         raise ValueError("invalid digest length %d. Expected digest length for %s is %d" % (len(digest), algo, expected_digest_length[algo]))
@@ -3663,7 +3671,7 @@ def plot(narray, xColumnIndex=-1, columnNames=None, title=None, show=True, nodes
         tableNode = slicer.mrmlScene.AddNewNodeByClass("vtkMRMLTableNode")
 
     if title is not None:
-        tableNode.SetName(title + " table")
+        tableNode.SetName(f"{title} table")
     updateTableFromArray(tableNode, narray)
     # Update column names
     numberOfColumns = tableNode.GetTable().GetNumberOfColumns()
@@ -3671,22 +3679,21 @@ def plot(narray, xColumnIndex=-1, columnNames=None, title=None, show=True, nodes
     for columnIndex in range(numberOfColumns):
         if (columnNames is not None) and (len(columnNames) > columnIndex):
             columnName = columnNames[columnIndex]
+        elif columnIndex == xColumnIndex:
+            columnName = "X"
+        elif yColumnIndex == 0:
+            columnName = "Y"
+            yColumnIndex += 1
         else:
-            if columnIndex == xColumnIndex:
-                columnName = "X"
-            elif yColumnIndex == 0:
-                columnName = "Y"
-                yColumnIndex += 1
-            else:
-                columnName = "Y" + str(yColumnIndex)
-                yColumnIndex += 1
+            columnName = f"Y{str(yColumnIndex)}"
+            yColumnIndex += 1
         tableNode.GetTable().GetColumn(columnIndex).SetName(columnName)
 
     # Create chart and add plot
     if chartNode is None:
         chartNode = slicer.mrmlScene.AddNewNodeByClass("vtkMRMLPlotChartNode")
     if title is not None:
-        chartNode.SetName(title + " chart")
+        chartNode.SetName(f"{title} chart")
         chartNode.SetTitle(title)
 
     # Create plot series node(s)
@@ -3712,7 +3719,7 @@ def plot(narray, xColumnIndex=-1, columnNames=None, title=None, show=True, nodes
         yColumnName = tableNode.GetTable().GetColumn(columnIndex).GetName()
         seriesNode.SetYColumnName(yColumnName)
         if title:
-            seriesNode.SetName(title + " " + yColumnName)
+            seriesNode.SetName(f"{title} {yColumnName}")
         else:
             # When only columnNames are set (no `title` parameter), the user should see
             # the name of the column as the name of the series.
@@ -3762,21 +3769,33 @@ def launchConsoleProcess(args, useStartupEnvironment=True, updateEnvironment=Non
         startupEnv = startupEnvironment()
         if updateEnvironment:
             startupEnv.update(updateEnvironment)
+    elif updateEnvironment:
+        startupEnv = os.environ.copy()
+        startupEnv.update(updateEnvironment)
     else:
-        if updateEnvironment:
-            startupEnv = os.environ.copy()
-            startupEnv.update(updateEnvironment)
-        else:
-            startupEnv = None
-    if os.name == "nt":
-        # Hide console window (only needed on Windows)
-        info = subprocess.STARTUPINFO()
-        info.dwFlags = 1
-        info.wShowWindow = 0
-        proc = subprocess.Popen(args, env=startupEnv, stdout=subprocess.PIPE, stderr=subprocess.STDOUT, universal_newlines=True, startupinfo=info, cwd=cwd)
-    else:
-        proc = subprocess.Popen(args, env=startupEnv, stdout=subprocess.PIPE, stderr=subprocess.STDOUT, universal_newlines=True, cwd=cwd)
-    return proc
+        startupEnv = None
+    if os.name != "nt":
+        return subprocess.Popen(
+            args,
+            env=startupEnv,
+            stdout=subprocess.PIPE,
+            stderr=subprocess.STDOUT,
+            universal_newlines=True,
+            cwd=cwd,
+        )
+    # Hide console window (only needed on Windows)
+    info = subprocess.STARTUPINFO()
+    info.dwFlags = 1
+    info.wShowWindow = 0
+    return subprocess.Popen(
+        args,
+        env=startupEnv,
+        stdout=subprocess.PIPE,
+        stderr=subprocess.STDOUT,
+        universal_newlines=True,
+        startupinfo=info,
+        cwd=cwd,
+    )
 
 
 def logProcessOutput(proc):
@@ -3839,7 +3858,7 @@ def _executePythonModule(module, args):
         import os
         import sys
 
-        pythonSlicerExecutablePath = os.path.dirname(sys.executable) + "/PythonSlicer"
+        pythonSlicerExecutablePath = f"{os.path.dirname(sys.executable)}/PythonSlicer"
         if os.name == "nt":
             pythonSlicerExecutablePath += ".exe"
 
@@ -3948,6 +3967,4 @@ def longPath(path):
     if not qt.QDir.isAbsolutePath(path):
         return path
     # Return path as is if UNC prefix is already applied
-    if path[:4] == "\\\\?\\":
-        return path
-    return "\\\\?\\" + path.replace("/", "\\")
+    return path if path[:4] == "\\\\?\\" else "\\\\?\\" + path.replace("/", "\\")

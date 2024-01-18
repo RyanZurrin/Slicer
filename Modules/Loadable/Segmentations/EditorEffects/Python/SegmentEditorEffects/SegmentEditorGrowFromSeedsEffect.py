@@ -36,9 +36,7 @@ class SegmentEditorGrowFromSeedsEffect(AbstractScriptedSegmentEditorAutoComplete
 
     def icon(self):
         iconPath = os.path.join(os.path.dirname(__file__), "Resources/Icons/GrowFromSeeds.png")
-        if os.path.exists(iconPath):
-            return qt.QIcon(iconPath)
-        return qt.QIcon()
+        return qt.QIcon(iconPath) if os.path.exists(iconPath) else qt.QIcon()
 
     def helpText(self):
         return "<html>" + _("""Growing segments to create complete segmentation<br>.

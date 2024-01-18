@@ -4,7 +4,7 @@ import os
 
 def testMRMLSceneImportAndExport():
     tempDir = slicer.app.temporaryPath
-    scenePath = tempDir + "/temp_scene.mrml"
+    scenePath = f"{tempDir}/temp_scene.mrml"
     slicer.mrmlScene.SetURL(scenePath)
     if not slicer.mrmlScene.Commit(scenePath):
         raise Exception("Saving a MRML scene failed !")

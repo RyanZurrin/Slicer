@@ -117,24 +117,30 @@ class SubjectHierarchyGenericSelfTestTest(ScriptedLoadableModuleTest):
     # ------------------------------------------------------------------------------
     def section_SetupPathsAndNames(self):
         # Set constants
-        subjectHierarchyGenericSelfTestDir = slicer.app.temporaryPath + "/SubjectHierarchyGenericSelfTest"
-        print("Test directory: " + subjectHierarchyGenericSelfTestDir)
+        subjectHierarchyGenericSelfTestDir = (
+            f"{slicer.app.temporaryPath}/SubjectHierarchyGenericSelfTest"
+        )
+        print(f"Test directory: {subjectHierarchyGenericSelfTestDir}")
         if not os.access(subjectHierarchyGenericSelfTestDir, os.F_OK):
             os.mkdir(subjectHierarchyGenericSelfTestDir)
 
-        self.dicomDataDir = subjectHierarchyGenericSelfTestDir + "/DicomData"
+        self.dicomDataDir = f"{subjectHierarchyGenericSelfTestDir}/DicomData"
         if not os.access(self.dicomDataDir, os.F_OK):
             os.mkdir(self.dicomDataDir)
 
-        self.dicomDatabaseDir = subjectHierarchyGenericSelfTestDir + "/CtkDicomDatabase"
-        self.dicomZipFileUrl = TESTING_DATA_URL + "SHA256/1aa0bb177bbf6471ca5f2192340a6cecdedb81b33506b03ff316c6b5f624e863"
+        self.dicomDatabaseDir = (
+            f"{subjectHierarchyGenericSelfTestDir}/CtkDicomDatabase"
+        )
+        self.dicomZipFileUrl = f"{TESTING_DATA_URL}SHA256/1aa0bb177bbf6471ca5f2192340a6cecdedb81b33506b03ff316c6b5f624e863"
         self.dicomZipChecksum = "SHA256:1aa0bb177bbf6471ca5f2192340a6cecdedb81b33506b03ff316c6b5f624e863"
-        self.dicomZipFilePath = subjectHierarchyGenericSelfTestDir + "/TestDicomCT.zip"
+        self.dicomZipFilePath = f"{subjectHierarchyGenericSelfTestDir}/TestDicomCT.zip"
         self.expectedNumOfFilesInDicomDataDir = 10
-        self.tempDir = subjectHierarchyGenericSelfTestDir + "/Temp"
-        self.genericTestSceneFileName = self.tempDir + "/SubjectHierarchyGenericSelfTestScene.mrml"
+        self.tempDir = f"{subjectHierarchyGenericSelfTestDir}/Temp"
+        self.genericTestSceneFileName = (
+            f"{self.tempDir}/SubjectHierarchyGenericSelfTestScene.mrml"
+        )
 
-        self.attributeFilterTestSceneFileUrl = TESTING_DATA_URL + "SHA256/83e0df42d178405dccaf5a87d0661dd4bad71b535c6f15457344a71c4c0b7984"
+        self.attributeFilterTestSceneFileUrl = f"{TESTING_DATA_URL}SHA256/83e0df42d178405dccaf5a87d0661dd4bad71b535c6f15457344a71c4c0b7984"
         self.attributeFilterTestSceneChecksum = "SHA256:83e0df42d178405dccaf5a87d0661dd4bad71b535c6f15457344a71c4c0b7984"
         self.attributeFilterTestSceneFileName = "SubjectHierarchyAttributeFilterTestScene.mrb"
 
@@ -227,7 +233,7 @@ class SubjectHierarchyGenericSelfTestTest(ScriptedLoadableModuleTest):
 
         # Save MRML scene into file
         slicer.mrmlScene.Commit(self.genericTestSceneFileName)
-        logging.info("Scene saved into " + self.genericTestSceneFileName)
+        logging.info(f"Scene saved into {self.genericTestSceneFileName}")
 
         readable = os.access(self.genericTestSceneFileName, os.R_OK)
         self.assertTrue(readable)
@@ -238,7 +244,7 @@ class SubjectHierarchyGenericSelfTestTest(ScriptedLoadableModuleTest):
 
         # Get volume previously loaded from DICOM
         volumeNodes = list(slicer.util.getNodes("vtkMRMLScalarVolumeNode*").values())
-        ctVolumeNode = volumeNodes[len(volumeNodes) - 1]
+        ctVolumeNode = volumeNodes[-1]
         self.assertIsNotNone(ctVolumeNode)
 
         # Create sample labelmap and model and add them in subject hierarchy
@@ -303,7 +309,7 @@ class SubjectHierarchyGenericSelfTestTest(ScriptedLoadableModuleTest):
 
         # Create output volume
         resampledVolumeNode = slicer.vtkMRMLScalarVolumeNode()
-        resampledVolumeNode.SetName(ctVolumeNode.GetName() + "_Resampled_10x10x10mm")
+        resampledVolumeNode.SetName(f"{ctVolumeNode.GetName()}_Resampled_10x10x10mm")
         slicer.mrmlScene.AddNode(resampledVolumeNode)
 
         # Resample
@@ -431,7 +437,9 @@ class SubjectHierarchyGenericSelfTestTest(ScriptedLoadableModuleTest):
             # loadFiles=True,
             checksums=self.attributeFilterTestSceneChecksum)[0]
         if not os.path.exists(sceneFile):
-            logging.error("Failed to download attribute filter test scene to path " + str(sceneFile))
+            logging.error(
+                f"Failed to download attribute filter test scene to path {str(sceneFile)}"
+            )
         self.assertTrue(os.path.exists(sceneFile))
 
         slicer.mrmlScene.Clear()

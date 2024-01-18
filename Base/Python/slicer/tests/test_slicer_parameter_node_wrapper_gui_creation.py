@@ -16,10 +16,14 @@ from MRMLCorePython import (
 
 
 def findChildWithProperty(widget, property, propertyValue):
-    for child in widget.findChildren(qt.QObject):
-        if child.property(property) == propertyValue:
-            return child
-    return None
+    return next(
+        (
+            child
+            for child in widget.findChildren(qt.QObject)
+            if child.property(property) == propertyValue
+        ),
+        None,
+    )
 
 
 class ParameterNodeWrapperGuiCreationTest(unittest.TestCase):

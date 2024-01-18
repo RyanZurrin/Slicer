@@ -33,8 +33,7 @@ def PullVolumeFromSlicer(nodeObjectOrName):
     """
     EnsureRegistration()
     myNodeFullITKAddress = GetSlicerITKReadWriteAddress(nodeObjectOrName)
-    sitkimage = sitk.ReadImage(myNodeFullITKAddress)
-    return sitkimage
+    return sitk.ReadImage(myNodeFullITKAddress)
 
 
 def GetSlicerITKReadWriteAddress(nodeObjectOrName):
@@ -44,8 +43,7 @@ def GetSlicerITKReadWriteAddress(nodeObjectOrName):
     myNode = nodeObjectOrName if isinstance(nodeObjectOrName, slicer.vtkMRMLNode) else slicer.util.getNode(nodeObjectOrName)
     myNodeSceneAddress = myNode.GetScene().GetAddressAsString("").replace("Addr=", "")
     myNodeSceneID = myNode.GetID()
-    myNodeFullITKAddress = "slicer:" + myNodeSceneAddress + "#" + myNodeSceneID
-    return myNodeFullITKAddress
+    return f"slicer:{myNodeSceneAddress}#{myNodeSceneID}"
 
 
 def EnsureRegistration():

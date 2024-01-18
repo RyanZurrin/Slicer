@@ -192,8 +192,9 @@ class RSNAVisTutorialTest(ScriptedLoadableModuleTest):
 
         dicomFilesDirectory = SampleData.downloadFromURL(
             fileNames="dataset1_Thorax_Abdomen.zip",
-            uris=TESTING_DATA_URL + "SHA256/17a4199aad03a373dab27dc17e5bfcf84fc194d0a30975b4073e5b595d43a56a",
-            checksums="SHA256:17a4199aad03a373dab27dc17e5bfcf84fc194d0a30975b4073e5b595d43a56a")[0]
+            uris=f"{TESTING_DATA_URL}SHA256/17a4199aad03a373dab27dc17e5bfcf84fc194d0a30975b4073e5b595d43a56a",
+            checksums="SHA256:17a4199aad03a373dab27dc17e5bfcf84fc194d0a30975b4073e5b595d43a56a",
+        )[0]
 
         try:
             self.delayDisplay("Switching to temp database directory")
@@ -312,8 +313,9 @@ class RSNAVisTutorialTest(ScriptedLoadableModuleTest):
         SampleData.downloadFromURL(
             fileNames="Head_Scene.mrb",
             loadFiles=True,
-            uris=TESTING_DATA_URL + "SHA256/6785e481925c912a5a3940e9c9b71935df93a78a871e10f66ab71f8478229e68",
-            checksums="SHA256:6785e481925c912a5a3940e9c9b71935df93a78a871e10f66ab71f8478229e68")
+            uris=f"{TESTING_DATA_URL}SHA256/6785e481925c912a5a3940e9c9b71935df93a78a871e10f66ab71f8478229e68",
+            checksums="SHA256:6785e481925c912a5a3940e9c9b71935df93a78a871e10f66ab71f8478229e68",
+        )
 
         self.takeScreenshot("Head-Downloaded", "Finished with download and loading", -1)
 
@@ -412,8 +414,9 @@ class RSNAVisTutorialTest(ScriptedLoadableModuleTest):
         SampleData.downloadFromURL(
             fileNames="LiverSegments_Scene.mrb",
             loadFiles=True,
-            uris=TESTING_DATA_URL + "SHA256/ff797140c13a5988a7b72920adf0d2dab390a9babeab9161d5c52613328249f7",
-            checksums="SHA256:ff797140c13a5988a7b72920adf0d2dab390a9babeab9161d5c52613328249f7")
+            uris=f"{TESTING_DATA_URL}SHA256/ff797140c13a5988a7b72920adf0d2dab390a9babeab9161d5c52613328249f7",
+            checksums="SHA256:ff797140c13a5988a7b72920adf0d2dab390a9babeab9161d5c52613328249f7",
+        )
 
         self.takeScreenshot("Liver-Loaded", "Loaded Liver scene", -1)
 
@@ -485,8 +488,9 @@ class RSNAVisTutorialTest(ScriptedLoadableModuleTest):
         SampleData.downloadFromURL(
             fileNames="LungSegments_Scene.mrb",
             loadFiles=True,
-            uris=TESTING_DATA_URL + "SHA256/89ffc6cabd76a17dfa6beb404a5901a4b4e4b4f2f4ee46c2d5f4d34459f554a1",
-            checksums="SHA256:89ffc6cabd76a17dfa6beb404a5901a4b4e4b4f2f4ee46c2d5f4d34459f554a1")
+            uris=f"{TESTING_DATA_URL}SHA256/89ffc6cabd76a17dfa6beb404a5901a4b4e4b4f2f4ee46c2d5f4d34459f554a1",
+            checksums="SHA256:89ffc6cabd76a17dfa6beb404a5901a4b4e4b4f2f4ee46c2d5f4d34459f554a1",
+        )
 
         self.takeScreenshot("Lung-Loaded", "Finished with download and loading", -1)
 
@@ -531,10 +535,9 @@ class RSNAVisTutorialTest(ScriptedLoadableModuleTest):
             cameraNode.GetCamera().Elevation(-10)
             lowerLobeNodes = slicer.util.getNodes("*LowerLobe*")
             for showNode in lowerLobeNodes:
-                self.delayDisplay("Showing Node %s" % showNode, 300)
+                self.delayDisplay(f"Showing Node {showNode}", 300)
                 for node in lowerLobeNodes:
-                    displayNode = lowerLobeNodes[node].GetDisplayNode()
-                    if displayNode:
+                    if displayNode := lowerLobeNodes[node].GetDisplayNode():
                         displayNode.SetVisibility(1 if node == showNode else 0)
             self.takeScreenshot("Lung-Question4", "View Question 4", -1)
 

@@ -84,9 +84,9 @@ class SlicerMRBMultipleSaveRestoreLoop(ScriptedLoadableModuleTest):
         """
 
         print("Running SlicerMRBMultipleSaveRestoreLoop Test case with:")
-        print("numberOfIterations: %s" % self.numberOfIterations)
-        print("uniqueDirectory : %s" % self.uniqueDirectory)
-        print("strict : %s" % self.strict)
+        print(f"numberOfIterations: {self.numberOfIterations}")
+        print(f"uniqueDirectory : {self.uniqueDirectory}")
+        print(f"strict : {self.strict}")
 
         #
         # first, get the data
@@ -115,12 +115,12 @@ class SlicerMRBMultipleSaveRestoreLoop(ScriptedLoadableModuleTest):
             #
             sceneSaveDirectory = slicer.util.tempDirectory("__scene__")
             mrbFilePath = slicer.util.tempDirectory("__mrb__") + "/SlicerMRBMultipleSaveRestoreLoop-" + str(i) + ".mrb"
-            self.delayDisplay("Saving mrb to: %s" % mrbFilePath)
+            self.delayDisplay(f"Saving mrb to: {mrbFilePath}")
             screenShot = ctk.ctkWidgetsUtils.grabWidget(widget)
             self.assertTrue(
                 ioManager.saveScene(mrbFilePath, screenShot),
             )
-            self.delayDisplay("Finished saving MRB %s" % i)
+            self.delayDisplay(f"Finished saving MRB {i}")
 
             #
             # reload the mrb

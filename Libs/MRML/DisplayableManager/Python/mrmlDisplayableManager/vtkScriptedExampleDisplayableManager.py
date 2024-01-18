@@ -56,7 +56,6 @@ class vtkScriptedExampleDisplayableManager:
 
     def Create(self):
         print("vtkScriptedExampleDisplayableManager - Create")
-        pass
 
     def GetMRMLSceneEventsToObserve(self):
         print("vtkScriptedExampleDisplayableManager - GetMRMLSceneEventsToObserve")
@@ -67,19 +66,15 @@ class vtkScriptedExampleDisplayableManager:
 
     def ProcessMRMLSceneEvents(self, scene, eventid, node):
         print("vtkScriptedExampleDisplayableManager - ProcessMRMLSceneEvents(eventid,", eventid, ")")
-        pass
 
     def ProcessMRMLNodesEvents(self, scene, eventid, callData):
         print("vtkScriptedExampleDisplayableManager - ProcessMRMLNodesEvents(eventid,", eventid, ")")
-        pass
 
     def RemoveMRMLObservers(self):
         print("vtkScriptedExampleDisplayableManager - RemoveMRMLObservers")
-        pass
 
     def UpdateFromMRML(self):
         print("vtkScriptedExampleDisplayableManager - UpdateFromMRML")
-        pass
 
     def OnInteractorStyleEvent(self, eventid):
         print("vtkScriptedExampleDisplayableManager - OnInteractorStyleEvent(eventid,", eventid, ")")

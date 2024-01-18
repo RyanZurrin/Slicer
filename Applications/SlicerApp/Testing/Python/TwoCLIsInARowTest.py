@@ -96,10 +96,10 @@ class TwoCLIsInARowTestLogic(ScriptedLoadableModuleLogic):
         self.Observations.append([object, event, method, group, tag])
 
     def hasObserver(self, object, event, method):
-        for o, e, m, g, t in self.Observations:
-            if o == object and e == event and m == method:
-                return True
-        return False
+        return any(
+            o == object and e == event and m == method
+            for o, e, m, g, t in self.Observations
+        )
 
     def removeObservers(self, object, event, method):
         for o, e, m, g, t in self.Observations:
@@ -130,12 +130,12 @@ class TwoCLIsInARowTestTest(ScriptedLoadableModuleTest):
         self.assertTrue(tempFile.open())
 
         logic = TwoCLIsInARowTestLogic()
-        logic.parameters = {}
-        logic.parameters["InputValue1"] = 1
-        logic.parameters["InputValue2"] = 2
-        logic.parameters["OperationType"] = "Addition"
-        logic.parameters["OutputFile"] = tempFile.fileName()
-
+        logic.parameters = {
+            "InputValue1": 1,
+            "InputValue2": 2,
+            "OperationType": "Addition",
+            "OutputFile": tempFile.fileName(),
+        }
         logic.runTest()
         while not logic.success:
             self.delayDisplay("Waiting for module 2 to complete...")

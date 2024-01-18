@@ -57,17 +57,19 @@ class SitkUtilsTests(unittest.TestCase):
                          "Modified origin mismatch")
 
         """ Test push with all parameter combinations """
+        volumeNodeNew = None
         for volumeClassName in ["vtkMRMLScalarVolumeNode", "vtkMRMLLabelMapVolumeNode"]:
             volumeNodeTested = None
-            volumeNodeNew = None
             for pushToNewNode in [True, False]:
-                print("volumeClassName : %s" % volumeClassName)
-                print("pushToNewNode : %s " % pushToNewNode)
+                print(f"volumeClassName : {volumeClassName}")
+                print(f"pushToNewNode : {pushToNewNode} ")
 
                 if pushToNewNode:
-                    volumeNodeTested = su.PushVolumeToSlicer(sitkimage,
-                                                             name="volumeNode-" + volumeClassName + "-" + str(pushToNewNode),
-                                                             className=volumeClassName)
+                    volumeNodeTested = su.PushVolumeToSlicer(
+                        sitkimage,
+                        name=f"volumeNode-{volumeClassName}-{str(pushToNewNode)}",
+                        className=volumeClassName,
+                    )
                     existingVolumeNode = volumeNodeTested
                 else:
                     volumeNodeTested = su.PushVolumeToSlicer(sitkimage, existingVolumeNode)

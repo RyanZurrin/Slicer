@@ -52,8 +52,10 @@ def check_exit_code(slicer_executable, testing_enabled=True, debug=False):
         # Copy helper module that creates a file when startup completed event is received
         currentDirPath = os.path.dirname(__file__).replace("\\", "/")
         from shutil import copyfile
-        copyfile(currentDirPath + "/ScriptedModuleCleanupTestHelperModule.py",
-                 temporaryModuleDirPath + "/ModuleCleanup.py")
+        copyfile(
+            f"{currentDirPath}/ScriptedModuleCleanupTestHelperModule.py",
+            f"{temporaryModuleDirPath}/ModuleCleanup.py",
+        )
 
         common_arguments = [
             "--no-splash",
@@ -62,10 +64,10 @@ def check_exit_code(slicer_executable, testing_enabled=True, debug=False):
             "--python-code", 'slicer.util.selectModule("ModuleCleanup")',
         ]
 
-        test_output_file = temporaryModuleDirPath + "/ModuleCleanupTest.out"
+        test_output_file = f"{temporaryModuleDirPath}/ModuleCleanupTest.out"
         os.environ["SLICER_MODULE_CLEANUP_TEST_OUTPUT"] = test_output_file
         if debug:
-            print("SLICER_MODULE_CLEANUP_TEST_OUTPUT=%s" % test_output_file)
+            print(f"SLICER_MODULE_CLEANUP_TEST_OUTPUT={test_output_file}")
 
         # Test
         args = list(common_arguments)

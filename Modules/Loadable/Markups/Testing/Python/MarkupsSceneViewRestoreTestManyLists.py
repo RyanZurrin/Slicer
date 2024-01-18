@@ -7,7 +7,7 @@ fidNode1 = slicer.mrmlScene.AddNewNodeByClass("vtkMRMLMarkupsFiducialNode", "Fid
 fidNode1.CreateDefaultDisplayNodes()
 coords = [0.0, 0.0, 0.0]
 numFidsInList1 = 5
-for i in range(numFidsInList1):
+for _ in range(numFidsInList1):
     fidNode1.AddControlPoint(coords)
     coords[0] += 1.0
     coords[1] += 2.0
@@ -17,7 +17,7 @@ for i in range(numFidsInList1):
 fidNode2 = slicer.mrmlScene.AddNewNodeByClass("vtkMRMLMarkupsFiducialNode", "FidNode2")
 fidNode2.CreateDefaultDisplayNodes()
 numFidsInList2 = 10
-for i in range(numFidsInList2):
+for _ in range(numFidsInList2):
     fidNode2.AddControlPoint(coords)
     coords[0] += 1.0
     coords[1] += 1.0
@@ -33,7 +33,7 @@ sv.StoreScene()
 fidNode3 = slicer.mrmlScene.AddNewNodeByClass("vtkMRMLMarkupsFiducialNode", "FidNode3")
 fidNode3.CreateDefaultDisplayNodes()
 numFidsInList3 = 2
-for i in range(numFidsInList3):
+for _ in range(numFidsInList3):
     fidNode3.AddControlPoint(coords)
     coords[0] += 1.0
     coords[1] += 2.0
@@ -45,15 +45,15 @@ sv.RestoreScene()
 numFidNodesAfterRestore = slicer.mrmlScene.GetNumberOfNodesByClass("vtkMRMLMarkupsFiducialNode")
 if numFidNodesAfterRestore != numFidNodesBeforeStore:
     print("After restoring the scene, expected ", numFidNodesBeforeStore, " control points nodes, but have ", numFidNodesAfterRestore)
-    exceptionMessage = "After restoring the scene, expected " + str(numFidNodesBeforeStore) + " control points nodes, but have " + str(numFidNodesAfterRestore)
+    exceptionMessage = f"After restoring the scene, expected {str(numFidNodesBeforeStore)} control points nodes, but have {str(numFidNodesAfterRestore)}"
     raise Exception(exceptionMessage)
 
 fid1AfterRestore = slicer.mrmlScene.GetFirstNodeByName("FidNode1")
 numFidsInList1AfterRestore = fid1AfterRestore.GetNumberOfControlPoints()
 print("After restore, list with name FidNode1 has id ", fid1AfterRestore.GetID(), " and num fids = ", numFidsInList1AfterRestore)
 if numFidsInList1AfterRestore != numFidsInList1:
-    exceptionMessage = "After restoring list 1, id = " + fid1AfterRestore.GetID()
-    exceptionMessage += ", expected " + str(numFidsInList1) + " but got "
+    exceptionMessage = f"After restoring list 1, id = {fid1AfterRestore.GetID()}"
+    exceptionMessage += f", expected {numFidsInList1} but got "
     exceptionMessage += str(numFidsInList1AfterRestore)
     raise Exception(exceptionMessage)
 
@@ -61,8 +61,8 @@ fid2AfterRestore = slicer.mrmlScene.GetFirstNodeByName("FidNode2")
 numFidsInList2AfterRestore = fid2AfterRestore.GetNumberOfControlPoints()
 print("After restore, list with name FidNode2 has id ", fid2AfterRestore.GetID(), " and num fids = ", numFidsInList2AfterRestore)
 if numFidsInList2AfterRestore != numFidsInList2:
-    exceptionMessage = "After restoring list 2,  id = " + fid2AfterRestore.GetID()
-    exceptionMessage += ", expected " + str(numFidsInList2) + " but got "
+    exceptionMessage = f"After restoring list 2,  id = {fid2AfterRestore.GetID()}"
+    exceptionMessage += f", expected {numFidsInList2} but got "
     exceptionMessage += str(numFidsInList2AfterRestore)
     raise Exception(exceptionMessage)
 
@@ -80,8 +80,8 @@ for markupsNode in [fid1AfterRestore, fid2AfterRestore]:
     numberOfControlPoints = controlPointsPoly.GetNumberOfPoints()
     print(f"Markups widget {markupsNode.GetName()} has number of control points = {numberOfControlPoints}")
     if numberOfControlPoints != markupsNode.GetNumberOfControlPoints():
-        exceptionMessage = "After restoring " + markupsNode.GetName() + ", expected widget to have "
-        exceptionMessage += str(markupsNode.GetNumberOfControlPoints()) + " points, but it has "
+        exceptionMessage = f"After restoring {markupsNode.GetName()}, expected widget to have "
+        exceptionMessage += f"{str(markupsNode.GetNumberOfControlPoints())} points, but it has "
         exceptionMessage += str(numberOfControlPoints)
         raise Exception(exceptionMessage)
     # check positions
@@ -95,8 +95,10 @@ for markupsNode in [fid1AfterRestore, fid2AfterRestore]:
         zdiff = fidPos[2] - worldPos[2]
         diffTotal = xdiff + ydiff + zdiff
         if diffTotal > 0.1:
-            exceptionMessage = markupsNode.GetName() + ": Difference between control point position " + str(s)
-            exceptionMessage += " and representation point position totals = " + str(diffTotal)
+            exceptionMessage = f"{markupsNode.GetName()}: Difference between control point position {str(s)}"
+            exceptionMessage += (
+                f" and representation point position totals = {str(diffTotal)}"
+            )
             raise Exception(exceptionMessage)
     # Release reference to VTK widget, otherwise application could crash on exit
     del markupsWidget

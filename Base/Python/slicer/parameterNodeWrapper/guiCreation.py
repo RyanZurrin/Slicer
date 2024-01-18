@@ -98,9 +98,7 @@ def parameterNodeGuiCreator(classtype=None):
         return _processGuiCreator(cls)
 
     # See if we're being called as @parameterNodeGuiCreator or @parameterNodeGuiCreator().
-    if classtype is None:
-        return wrap
-    return wrap(classtype)
+    return wrap if classtype is None else wrap(classtype)
 
 
 # Sometimes there is more than one valid widget for a datatype.

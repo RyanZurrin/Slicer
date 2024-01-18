@@ -28,9 +28,7 @@ class SegmentEditorHollowEffect(AbstractScriptedSegmentEditorEffect):
 
     def icon(self):
         iconPath = os.path.join(os.path.dirname(__file__), "Resources/Icons/Hollow.png")
-        if os.path.exists(iconPath):
-            return qt.QIcon(iconPath)
-        return qt.QIcon()
+        return qt.QIcon(iconPath) if os.path.exists(iconPath) else qt.QIcon()
 
     def helpText(self):
         return _("""Make the selected segment hollow by replacing the segment with a uniform-thickness shell defined by the segment boundary.""")
@@ -67,12 +65,14 @@ class SegmentEditorHollowEffect(AbstractScriptedSegmentEditorEffect):
         self.applyToAllVisibleSegmentsCheckBox = qt.QCheckBox()
         self.applyToAllVisibleSegmentsCheckBox.setToolTip(
             _("Apply hollow effect to all visible segments in this segmentation node. This operation may take a while."))
-        self.applyToAllVisibleSegmentsCheckBox.objectName = self.__class__.__name__ + "ApplyToAllVisibleSegments"
+        self.applyToAllVisibleSegmentsCheckBox.objectName = (
+            f"{self.__class__.__name__}ApplyToAllVisibleSegments"
+        )
         self.applyToAllVisibleSegmentsLabel = self.scriptedEffect.addLabeledOptionsWidget(
             _("Apply to visible segments:"), self.applyToAllVisibleSegmentsCheckBox)
 
         self.applyButton = qt.QPushButton(_("Apply"))
-        self.applyButton.objectName = self.__class__.__name__ + "Apply"
+        self.applyButton.objectName = f"{self.__class__.__name__}Apply"
         self.applyButton.setToolTip(_("Makes the segment hollow by replacing it with a thick shell at the segment boundary."))
         self.scriptedEffect.addOptionsWidget(self.applyButton)
 
@@ -94,13 +94,21 @@ class SegmentEditorHollowEffect(AbstractScriptedSegmentEditorEffect):
 
     def getShellThicknessPixel(self):
         selectedSegmentLabelmapSpacing = [1.0, 1.0, 1.0]
-        selectedSegmentLabelmap = self.scriptedEffect.selectedSegmentLabelmap()
-        if selectedSegmentLabelmap:
+        if (
+            selectedSegmentLabelmap := self.scriptedEffect.selectedSegmentLabelmap()
+        ):
             selectedSegmentLabelmapSpacing = selectedSegmentLabelmap.GetSpacing()
 
         shellThicknessMM = abs(self.scriptedEffect.doubleParameter("ShellThicknessMm"))
-        shellThicknessPixel = [int(math.floor(shellThicknessMM / selectedSegmentLabelmapSpacing[componentIndex])) for componentIndex in range(3)]
-        return shellThicknessPixel
+        return [
+            int(
+                math.floor(
+                    shellThicknessMM
+                    / selectedSegmentLabelmapSpacing[componentIndex]
+                )
+            )
+            for componentIndex in range(3)
+        ]
 
     def updateGUIFromMRML(self):
         shellThicknessMM = self.scriptedEffect.doubleParameter("ShellThicknessMm")
@@ -122,8 +130,9 @@ class SegmentEditorHollowEffect(AbstractScriptedSegmentEditorEffect):
         self.outsideSurfaceOptionRadioButton.blockSignals(wasBlocked)
 
         selectedSegmentLabelmapSpacing = [1.0, 1.0, 1.0]
-        selectedSegmentLabelmap = self.scriptedEffect.selectedSegmentLabelmap()
-        if selectedSegmentLabelmap:
+        if (
+            selectedSegmentLabelmap := self.scriptedEffect.selectedSegmentLabelmap()
+        ):
             selectedSegmentLabelmapSpacing = selectedSegmentLabelmap.GetSpacing()
             shellThicknessPixel = self.getShellThicknessPixel()
             if shellThicknessPixel[0] < 1 or shellThicknessPixel[1] < 1 or shellThicknessPixel[2] < 1:
@@ -163,8 +172,9 @@ class SegmentEditorHollowEffect(AbstractScriptedSegmentEditorEffect):
 
     def getShellThicknessMM(self):
         selectedSegmentLabelmapSpacing = [1.0, 1.0, 1.0]
-        selectedSegmentLabelmap = self.scriptedEffect.selectedSegmentLabelmap()
-        if selectedSegmentLabelmap:
+        if (
+            selectedSegmentLabelmap := self.scriptedEffect.selectedSegmentLabelmap()
+        ):
             selectedSegmentLabelmapSpacing = selectedSegmentLabelmap.GetSpacing()
 
         shellThicknessPixel = self.getShellThicknessPixel()

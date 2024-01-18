@@ -65,15 +65,19 @@ This work is partially supported by PAR-07-249: R01CA131718 NA-MIC Virtual Colon
             url = slicer.app.documentationBaseUrl + docPage
         else:
             url = slicer.app.moduleDocumentationUrl(self.moduleName)
-        linkText = ("<p>" + _("For more information, see the {url_start}online documentation{url_end}.")
-                    .format(url_start=f'<a href="{url}">', url_end="</a>") + "</p>")
-        return linkText
+        return (
+            "<p>"
+            + _(
+                "For more information, see the {url_start}online documentation{url_end}."
+            ).format(url_start=f'<a href="{url}">', url_end="</a>")
+            + "</p>"
+        )
 
     def runTest(self, msec=100, **kwargs):
         """:param msec: delay to associate with :func:`ScriptedLoadableModuleTest.delayDisplay()`."""
         # Name of the test case class is expected to be <ModuleName>Test
         module = importlib.import_module(self.__module__)
-        className = self.moduleName + "Test"
+        className = f"{self.moduleName}Test"
         try:
             TestCaseClass = getattr(module, className)
         except AttributeError:
@@ -204,7 +208,7 @@ class ScriptedLoadableModuleWidget:
         self.editSourceButton.connect("clicked()", self.onEditSource)
 
         self.editModuleUiButton = None
-        moduleUiFileName = self.resourcePath("UI/%s.ui" % self.moduleName)
+        moduleUiFileName = self.resourcePath(f"UI/{self.moduleName}.ui")
 
         import os.path
 
@@ -241,7 +245,7 @@ class ScriptedLoadableModuleWidget:
         # from old ones.
         print("\n" * 2)
         print("-" * 30)
-        print("Reloading module: " + self.moduleName)
+        print(f"Reloading module: {self.moduleName}")
         print("-" * 30)
         print("\n" * 2)
 
@@ -276,8 +280,7 @@ class ScriptedLoadableModuleWidget:
             slicer.util.delayDisplay(f"Module file path '{absFilePath}' is copied to clipboard")
             return
 
-        editor = slicer.app.settings().value("Python/Editor")
-        if editor:
+        if editor := slicer.app.settings().value("Python/Editor"):
             # User specified a custom editor for .py files
             import subprocess
 
@@ -288,7 +291,9 @@ class ScriptedLoadableModuleWidget:
                 slicer.util.errorDisplay(f"Failed to open file:\n\n{filePath}\n\nusing editor: {editor}")
         else:
             # Rely on the default file association for opening the .py file
-            qt.QDesktopServices.openUrl(qt.QUrl("file:///" + filePath, qt.QUrl.TolerantMode))
+            qt.QDesktopServices.openUrl(
+                qt.QUrl(f"file:///{filePath}", qt.QUrl.TolerantMode)
+            )
 
 
 class ScriptedLoadableModuleLogic:
@@ -472,4 +477,4 @@ class ScriptedLoadableModuleTest(unittest.TestCase):
 
     def runTest(self):
         """Run a default selection of tests here."""
-        logging.warning("No test is defined in " + self.__class__.__name__)
+        logging.warning(f"No test is defined in {self.__class__.__name__}")
